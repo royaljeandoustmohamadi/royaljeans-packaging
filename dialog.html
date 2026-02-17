@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html class="light" dir="rtl" lang="fa">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>فرم ثبت کالا</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css">
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script src="https://cdn.jsdelivr.net/npm/jalaali-js@1.2.7/dist/jalaali.min.js"></script>
+<script src="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode:"class",
+  theme:{extend:{
+    colors:{"primary":"#135bec","bg-light":"#f6f6f8","bg-dark":"#101622"},
+    fontFamily:{display:["Vazirmatn","sans-serif"],body:["Vazirmatn","sans-serif"]}
+  }}
+}
+</script>
+<style>
+/* Floating label */
+.fl-input:focus ~ .fl-label,
+.fl-input:not(:placeholder-shown) ~ .fl-label,
+select.fl-input ~ .fl-label {
+  top:-0.5rem; font-size:0.7rem; line-height:1rem;
+  background:white; padding:0 0.25rem;
+}
+.dark .fl-input:focus ~ .fl-label,
+.dark .fl-input:not(:placeholder-shown) ~ .fl-label,
+.dark select.fl-input ~ .fl-label {
+  background:#1A202C;
+}
+/* Radio toggle */
+input[type="radio"]:checked + span {
+  background:white; color:#135bec;
+  box-shadow:0 1px 3px rgba(0,0,0,.12);
+  border:1px solid #e5e7eb;
+}
+.dark input[type="radio"]:checked + span {
+  background:#4A5568; color:white; border-color:#4A5568;
+}
+/* Number input arrows hide */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+input[type=number] { -moz-appearance:textfield; }
+/* Scrollbar hide */
+.no-scroll::-webkit-scrollbar { display:none; }
+.no-scroll { -ms-overflow-style:none; scrollbar-width:none; }
+/* Size table */
+.size-table th { font-size:0.7rem; padding:0.3rem 0.2rem; }
+.size-table td { padding:0.2rem; }
+.size-table input { height:2.1rem; font-size:0.8rem; text-align:center; }
+/* Toast */
+#toast {
+  position:fixed; bottom:5.5rem; left:50%; transform:translateX(-50%) translateY(20px);
+  z-index:9999; padding:0.75rem 1.5rem; border-radius:0.75rem;
+  font-size:0.9rem; font-weight:600; opacity:0; transition:all 0.3s;
+  pointer-events:none; white-space:nowrap;
+}
+#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+#toast.success { background:#16a34a; color:white; }
+#toast.error   { background:#dc2626; color:white; }
+</style>
+</head>
+<body class="bg-[#f6f6f8] dark:bg-[#101622] font-display min-h-screen flex flex-col text-[#111318] dark:text-white">
+
+<!-- HEADER -->
+<header class="bg-white dark:bg-[#1A202C] border-b border-[#f0f2f4] dark:border-[#2D3748] sticky top-0 z-50">
+  <div class="px-5 py-3 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="size-8 flex items-center justify-center bg-primary/10 rounded-lg text-primary">
+        <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+      </div>
+      <span class="text-lg font-black text-[#111318] dark:text-white tracking-tight">OMS</span>
+      <span class="hidden md:block text-[#616f89] text-sm">/ فرم ثبت کالا</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 bg-[#f0f2f4] dark:bg-[#2D3748] rounded-lg px-3 h-10 min-w-[200px]">
+        <span class="material-symbols-outlined text-[#616f89] text-[18px]">search</span>
+        <input id="searchCode" placeholder="جستجو با کد کالا (Enter)" type="text"
+          class="bg-transparent outline-none w-full text-sm placeholder:text-[#9ba3af] dark:text-white text-right"/>
+      </div>
+      <div id="userBadge" class="hidden md:flex items-center gap-2 text-xs text-[#616f89] border border-[#e5e7eb] dark:border-[#4A5568] rounded-lg px-3 py-2">
+        <span class="material-symbols-outlined text-[16px]">person</span>
+        <span id="userEmail">بارگذاری...</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="flex-1 py-6 px-4 sm:px-6 lg:px-8 pb-32">
+<div class="max-w-[1280px] mx-auto flex flex-col gap-5">
+
+  <!-- PAGE TITLE -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-black tracking-tight">مدیریت سفارش و کالا</h1>
+      <p class="text-sm text-[#616f89] mt-0.5">فرم ثبت و ویرایش اطلاعات سفارش</p>
+    </div>
+    <button id="resetBtn" class="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-white dark:bg-[#2D3748] border border-[#dbdfe6] dark:border-[#4A5568] rounded-lg hover:bg-gray-50 transition-colors self-start sm:self-auto">
+      <span class="material-symbols-outlined text-[18px]">refresh</span> پاکسازی فرم
+    </button>
+  </div>
+
+  <form id="mainForm" onsubmit="event.preventDefault()">
+    <input type="hidden" id="rowId" value=""/>
+    <input type="hidden" id="originalSaverName" value=""/>
+
+    <!-- ─── بخش ۱: اطلاعات پایه ─── -->
+    <section class="bg-white dark:bg-[#1A202C] rounded-xl border border-[#f0f2f4] dark:border-[#2D3748] overflow-hidden mb-5">
+      <div class="px-5 py-3 border-b border-[#f0f2f4] dark:border-[#2D3748] flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[20px]">info</span>
+        <h3 class="font-bold">اطلاعات پایه سفارش</h3>
+      </div>
+      <div class="p-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+
+        <!-- تاریخ -->
+        <div class="relative">
+          <input id="date" type="text" placeholder=" " autocomplete="off" data-jdp data-jdp-only-date
+            class="fl-input block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 pt-1 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer placeholder-transparent"/>
+          <label class="fl-label absolute right-3 top-3 text-[#616f89] text-sm transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary pointer-events-none">تاریخ *</label>
+          <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">calendar_today</span>
+        </div>
+
+        <!-- نام کالا -->
+        <div class="relative col-span-2">
+          <input id="name" type="text" placeholder=" "
+            class="fl-input block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 pt-1 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer placeholder-transparent"/>
+          <label class="fl-label absolute right-3 top-3 text-[#616f89] text-sm transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary pointer-events-none">نام کالا</label>
+        </div>
+
+        <!-- کد کالا -->
+        <div class="relative">
+          <input id="code" type="text" placeholder=" "
+            class="fl-input block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 pt-1 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer placeholder-transparent font-mono"/>
+          <label class="fl-label absolute right-3 top-3 text-[#616f89] text-sm transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary pointer-events-none">کد کالا *</label>
+          <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">qr_code</span>
+        </div>
+
+        <!-- وضعیت -->
+        <div class="relative">
+          <select id="status" class="fl-input appearance-none block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer">
+            <option value="" selected>— وضعیت *</option>
+            <option value="ورودی">ورودی</option>
+            <option value="تکمیل شده">تکمیل شده</option>
+            <option value="ارسال شده به انبار محصول">ارسال شده به انبار محصول</option>
+          </select>
+          <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">expand_more</span>
+        </div>
+
+        <!-- استایل -->
+        <div class="relative">
+          <select id="style" class="fl-input appearance-none block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer">
+            <option value="">— استایل</option>
+            <option value="new">➕ افزودن...</option>
+          </select>
+          <label class="fl-label absolute right-3 -top-2 text-[0.7rem] text-[#616f89] bg-white dark:bg-[#1A202C] px-1 pointer-events-none">استایل</label>
+          <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">expand_more</span>
+        </div>
+
+        <!-- نام تولیدی -->
+        <div class="relative">
+          <select id="productionSupplierName" class="fl-input appearance-none block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer">
+            <option value="">— نام تولیدی</option>
+            <option value="new">➕ افزودن...</option>
+          </select>
+          <label class="fl-label absolute right-3 -top-2 text-[0.7rem] text-[#616f89] bg-white dark:bg-[#1A202C] px-1 pointer-events-none">نام تولیدی</label>
+          <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">expand_more</span>
+        </div>
+
+        <!-- تامین کننده پارچه -->
+        <div class="relative">
+          <select id="fabricSupplierName" class="fl-input appearance-none block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer">
+            <option value="">— تامین کننده پارچه</option>
+            <option value="new">➕ افزودن...</option>
+          </select>
+          <label class="fl-label absolute right-3 -top-2 text-[0.7rem] text-[#616f89] bg-white dark:bg-[#1A202C] px-1 pointer-events-none">تامین کننده پارچه</label>
+          <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">expand_more</span>
+        </div>
+
+        <!-- پارچه -->
+        <div class="relative">
+          <select id="fabric" class="fl-input appearance-none block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer">
+            <option value="">— جنس پارچه</option>
+            <option value="new">➕ افزودن...</option>
+          </select>
+          <label class="fl-label absolute right-3 -top-2 text-[0.7rem] text-[#616f89] bg-white dark:bg-[#1A202C] px-1 pointer-events-none">پارچه</label>
+          <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">expand_more</span>
+        </div>
+
+        <!-- سنگشویی -->
+        <div class="relative">
+          <select id="stoneWash" class="fl-input appearance-none block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer">
+            <option value="">— سنگشویی (اختیاری)</option>
+            <option value="new">➕ افزودن...</option>
+          </select>
+          <label class="fl-label absolute right-3 -top-2 text-[0.7rem] text-[#616f89] bg-white dark:bg-[#1A202C] px-1 pointer-events-none">سنگشویی</label>
+          <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">expand_more</span>
+        </div>
+
+        <!-- نام بسته بندی -->
+        <div class="relative">
+          <select id="packingName" class="fl-input appearance-none block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer">
+            <option value="">— نوع بسته بندی</option>
+            <option value="new">➕ افزودن...</option>
+          </select>
+          <label class="fl-label absolute right-3 -top-2 text-[0.7rem] text-[#616f89] bg-white dark:bg-[#1A202C] px-1 pointer-events-none">نام بسته بندی</label>
+          <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">expand_more</span>
+        </div>
+
+        <!-- تعداد در پک -->
+        <div class="relative">
+          <input id="packingCount" type="number" min="0" placeholder=" "
+            class="fl-input block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 pt-1 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer placeholder-transparent text-center"/>
+          <label class="fl-label absolute right-3 top-3 text-[#616f89] text-sm transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary pointer-events-none">تعداد در پک</label>
+        </div>
+
+        <!-- تعداد کل -->
+        <div class="relative">
+          <input id="count" type="number" min="0" placeholder=" "
+            class="fl-input block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 pt-1 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer placeholder-transparent text-center"/>
+          <label class="fl-label absolute right-3 top-3 text-[#616f89] text-sm transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary pointer-events-none">تعداد کل</label>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ─── بخش ۲: نوع و سطح سفارش ─── -->
+    <section class="bg-white dark:bg-[#1A202C] rounded-xl border border-[#f0f2f4] dark:border-[#2D3748] overflow-hidden mb-5">
+      <div class="px-5 py-3 border-b border-[#f0f2f4] dark:border-[#2D3748] flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[20px]">category</span>
+        <h3 class="font-bold">نوع و سطح سفارش</h3>
+      </div>
+      <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- BU: نوع سفارش -->
+        <div class="flex flex-col gap-2">
+          <span class="text-sm font-semibold text-[#616f89]">نوع سفارش (BU)</span>
+          <div class="grid grid-cols-3 gap-1 p-1 bg-[#f0f2f4] dark:bg-[#2D3748] rounded-lg h-11 border border-[#dbdfe6] dark:border-[#4A5568]">
+            <label class="cursor-pointer"><input class="sr-only peer" name="bu" type="radio" value="رویال جین"/>
+              <span class="flex items-center justify-center w-full h-full rounded text-xs font-semibold text-[#616f89] transition-all">رویال جین</span></label>
+            <label class="cursor-pointer"><input class="sr-only peer" name="bu" type="radio" value="بار مشتری"/>
+              <span class="flex items-center justify-center w-full h-full rounded text-xs font-semibold text-[#616f89] transition-all">بار مشتری</span></label>
+            <label class="cursor-pointer"><input class="sr-only peer" name="bu" type="radio" value="نیوکالکشن"/>
+              <span class="flex items-center justify-center w-full h-full rounded text-xs font-semibold text-[#616f89] transition-all">نیوکالکشن</span></label>
+          </div>
+        </div>
+        <!-- BV: سطح سفارش -->
+        <div class="flex flex-col gap-2">
+          <span class="text-sm font-semibold text-[#616f89]">سطح سفارش (BV)</span>
+          <div class="grid grid-cols-3 gap-1 p-1 bg-[#f0f2f4] dark:bg-[#2D3748] rounded-lg h-11 border border-[#dbdfe6] dark:border-[#4A5568]">
+            <label class="cursor-pointer"><input class="sr-only peer" name="bv" type="radio" value="لارج"/>
+              <span class="flex items-center justify-center w-full h-full rounded text-xs font-semibold text-[#616f89] transition-all">لارج</span></label>
+            <label class="cursor-pointer"><input class="sr-only peer" name="bv" type="radio" value="نرمال"/>
+              <span class="flex items-center justify-center w-full h-full rounded text-xs font-semibold text-[#616f89] transition-all">نرمال</span></label>
+            <label class="cursor-pointer"><input class="sr-only peer" name="bv" type="radio" value="ECO"/>
+              <span class="flex items-center justify-center w-full h-full rounded text-xs font-semibold text-[#616f89] transition-all">ECO</span></label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── بخش ۳: جدول سایزها ─── -->
+    <section class="bg-white dark:bg-[#1A202C] rounded-xl border border-[#f0f2f4] dark:border-[#2D3748] overflow-hidden mb-5">
+      <div class="px-5 py-3 border-b border-[#f0f2f4] dark:border-[#2D3748] flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[20px]">straighten</span>
+        <h3 class="font-bold">سایزبندی</h3>
+      </div>
+      <div class="p-3 overflow-x-auto no-scroll">
+        <table class="size-table w-full border-collapse min-w-[640px]">
+          <thead>
+            <tr class="bg-[#f8f9fa] dark:bg-[#2D3748]">
+              <th class="text-right pr-3 py-2 text-xs font-bold text-[#616f89] w-24 rounded-r-lg">نوع</th>
+              <th class="text-center text-xs font-bold text-[#616f89] w-14">30</th>
+              <th class="text-center text-xs font-bold text-[#616f89] w-14">31</th>
+              <th class="text-center text-xs font-bold text-[#616f89] w-14">32</th>
+              <th class="text-center text-xs font-bold text-[#616f89] w-14">33</th>
+              <th class="text-center text-xs font-bold text-[#616f89] w-14">34</th>
+              <th class="text-center text-xs font-bold text-[#616f89] w-14">36</th>
+              <th class="text-center text-xs font-bold text-[#616f89] w-14">38</th>
+              <th class="text-center text-xs font-bold text-[#616f89] w-14 rounded-l-lg">40</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#f0f2f4] dark:divide-[#2D3748]">
+            <tr id="row_s">
+              <td class="pr-3 py-1.5"><span class="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">سالم</span></td>
+              <td class="p-1"><input id="size30_s" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size31_s" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size32_s" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size33_s" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size34_s" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size36_s" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size38_s" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size40_s" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+            </tr>
+            <tr id="row_e">
+              <td class="pr-3 py-1.5"><span class="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">اقتصادی</span></td>
+              <td class="p-1"><input id="size30_e" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size31_e" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size32_e" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size33_e" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size34_e" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size36_e" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size38_e" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size40_e" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+            </tr>
+            <tr id="row_e2">
+              <td class="pr-3 py-1.5"><span class="text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">اقتصادی ۲</span></td>
+              <td class="p-1"><input id="size30_e2" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size31_e2" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size32_e2" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size33_e2" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size34_e2" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size36_e2" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size38_e2" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size40_e2" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+            </tr>
+            <tr id="row_e3">
+              <td class="pr-3 py-1.5"><span class="text-xs font-bold text-purple-600 bg-purple-50 dark:bg-purple-900/30 px-2 py-0.5 rounded-full">اقتصادی ۳</span></td>
+              <td class="p-1"><input id="size30_e3" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size31_e3" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size32_e3" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size33_e3" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size34_e3" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size36_e3" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size38_e3" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size40_e3" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+            </tr>
+            <tr id="row_n">
+              <td class="pr-3 py-1.5"><span class="text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full">نمونه</span></td>
+              <td class="p-1"><input id="size30_n" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size31_n" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size32_n" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size33_n" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size34_n" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size36_n" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size38_n" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size40_n" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── بخش ۴: موجودی و مغایرت ─── -->
+    <section class="bg-white dark:bg-[#1A202C] rounded-xl border border-[#f0f2f4] dark:border-[#2D3748] overflow-hidden mb-5">
+      <div class="px-5 py-3 border-b border-[#f0f2f4] dark:border-[#2D3748] flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[20px]">warehouse</span>
+        <h3 class="font-bold">موجودی و مغایرت</h3>
+      </div>
+      <div class="p-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-bold text-[#616f89] uppercase tracking-wide">استوک پارچه</span>
+          <input id="stock_fabric" type="number" min="0" placeholder="0" class="w-full h-10 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-bold text-[#616f89] uppercase tracking-wide">استوک شست</span>
+          <input id="stock_wash" type="number" min="0" placeholder="0" class="w-full h-10 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-bold text-[#616f89] uppercase tracking-wide">استوک تولید</span>
+          <input id="stock_production" type="number" min="0" placeholder="0" class="w-full h-10 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-bold text-[#616f89] uppercase tracking-wide">تعداد قابل فروش</span>
+          <input id="saleable_count" type="number" min="0" placeholder="0" class="w-full h-10 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-bold text-[#616f89] uppercase tracking-wide">شست متفاوت</span>
+          <input id="different_wash" type="number" min="0" placeholder="0" class="w-full h-10 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-bold text-red-500 uppercase tracking-wide">ضایعات</span>
+          <input id="waste" type="number" min="0" placeholder="0" class="w-full h-10 rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 px-3 text-sm text-center focus:ring-2 focus:ring-red-300 focus:border-red-400"/>
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-bold text-red-500 uppercase tracking-wide">کسری سنگشویی</span>
+          <input id="stock_minus" type="number" min="0" placeholder="0" class="w-full h-10 rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 px-3 text-sm text-center focus:ring-2 focus:ring-red-300 focus:border-red-400"/>
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-bold text-green-600 uppercase tracking-wide">اضافه سنگشویی</span>
+          <input id="stock_plus" type="number" min="0" placeholder="0" class="w-full h-10 rounded-lg border border-green-200 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 px-3 text-sm text-center focus:ring-2 focus:ring-green-300 focus:border-green-400"/>
+        </label>
+      </div>
+    </section>
+
+    <!-- ─── بخش ۵: ملزومات + توضیحات + پرسنل ─── -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
+
+      <!-- ملزومات -->
+      <section class="bg-white dark:bg-[#1A202C] rounded-xl border border-[#f0f2f4] dark:border-[#2D3748] overflow-hidden">
+        <div class="px-5 py-3 border-b border-[#f0f2f4] dark:border-[#2D3748] flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[20px]">build</span>
+          <h3 class="font-bold">ملزومات</h3>
+        </div>
+        <div class="p-5 grid grid-cols-2 gap-2">
+          <label class="flex items-center gap-2 cursor-pointer group py-1.5">
+            <input id="btn" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
+            <span class="text-sm font-medium group-hover:text-primary transition-colors">دکمه</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer group py-1.5">
+            <input id="perch" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
+            <span class="text-sm font-medium group-hover:text-primary transition-colors">پرچ</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer group py-1.5">
+            <input id="pocketCard" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
+            <span class="text-sm font-medium group-hover:text-primary transition-colors">کارت جیب</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer group py-1.5">
+            <input id="sizeCard" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
+            <span class="text-sm font-medium group-hover:text-primary transition-colors">کارت سایز</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer group py-1.5">
+            <input id="hanger" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
+            <span class="text-sm font-medium group-hover:text-primary transition-colors">آویز</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer group py-1.5">
+            <input id="band" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
+            <span class="text-sm font-medium group-hover:text-primary transition-colors">بند</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer group py-1.5 col-span-2">
+            <input id="leather" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
+            <span class="text-sm font-medium group-hover:text-primary transition-colors">مارک چرمی</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- توضیحات و پرسنل -->
+      <section class="lg:col-span-2 bg-white dark:bg-[#1A202C] rounded-xl border border-[#f0f2f4] dark:border-[#2D3748] overflow-hidden">
+        <div class="px-5 py-3 border-b border-[#f0f2f4] dark:border-[#2D3748] flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[20px]">group</span>
+          <h3 class="font-bold">توضیحات و پرسنل</h3>
+        </div>
+        <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- تکمیل کننده -->
+          <div class="relative">
+            <select id="finisher" class="fl-input appearance-none block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer">
+              <option value="">— تکمیل کننده</option>
+              <option value="new">➕ افزودن...</option>
+            </select>
+            <label class="fl-label absolute right-3 -top-2 text-[0.7rem] text-[#616f89] bg-white dark:bg-[#1A202C] px-1 pointer-events-none">تکمیل کننده</label>
+            <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">expand_more</span>
+          </div>
+          <!-- کنترل کننده -->
+          <div class="relative">
+            <select id="controller" class="fl-input appearance-none block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer">
+              <option value="">— کنترل کننده</option>
+              <option value="new">➕ افزودن...</option>
+            </select>
+            <label class="fl-label absolute right-3 -top-2 text-[0.7rem] text-[#616f89] bg-white dark:bg-[#1A202C] px-1 pointer-events-none">کنترل کننده</label>
+            <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">expand_more</span>
+          </div>
+          <!-- توضیحات -->
+          <div class="relative md:col-span-2">
+            <textarea id="description" placeholder=" " rows="3"
+              class="fl-input block w-full rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 pt-4 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer placeholder-transparent resize-y min-h-[80px]"></textarea>
+            <label class="fl-label absolute right-3 top-3.5 text-[#616f89] text-sm transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary bg-white dark:bg-[#1A202C] px-1 pointer-events-none">توضیحات تکمیلی</label>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </form><!-- end form -->
+</div><!-- end max-w -->
+</main>
+
+<!-- FOOTER BAR -->
+<div class="fixed bottom-0 w-full bg-white dark:bg-[#1A202C] border-t border-[#f0f2f4] dark:border-[#2D3748] z-40">
+  <div class="max-w-[1280px] mx-auto px-5 py-3 flex items-center justify-between gap-3">
+    <div id="statusBar" class="flex items-center gap-2 text-sm text-[#616f89]">
+      <span id="statusDot" class="w-2 h-2 rounded-full bg-gray-300"></span>
+      <span id="statusText">آماده</span>
+      <span id="editingBadge" class="hidden text-xs bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full">ویرایش</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="cancelBtn" type="button"
+        class="px-5 py-2 text-sm font-bold border border-[#dbdfe6] dark:border-[#4A5568] rounded-lg hover:bg-gray-50 dark:hover:bg-[#2D3748] transition-colors">
+        انصراف
+      </button>
+      <button id="saveBtn" type="button"
+        class="flex items-center gap-2 px-6 py-2 text-sm font-bold bg-primary text-white rounded-lg shadow-lg shadow-blue-500/30 hover:bg-blue-600 transition-all active:scale-95">
+        <span class="material-symbols-outlined text-[18px]">save</span>
+        ذخیره سفارش
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ─── HELPERS ─────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+
+const fixSpaces = s => String(s ?? "").replace(/_/g," ").replace(/\s+/g," ").trim();
+
+const toEn = s => String(s ?? "")
+  .replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d))
+  .replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+
+// [FIX] parseNum: خالی → null (نه "") تا numColSet درست کار کند
+const parseNum = v => {
+  const s = toEn(String(v ?? "")).replace(/,/g,"").trim();
+  if (s === "" || s === "0") return (s === "0") ? 0 : null;
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
+};
+
+const toJalali = d => {
+  try {
+    const j = jalaali.toJalaali(d);
+    return `${j.jy}/${String(j.jm).padStart(2,"0")}/${String(j.jd).padStart(2,"0")}`;
+  } catch(e) { return ""; }
+};
+
+// ─── UI STATE ─────────────────────────────────────────────────────────
+let _busy = false;
+let _saveTimeout = null; // [FIX] timeout tracker
+
+function setBusy(on) {
+  _busy = !!on;
+  const btn = $("saveBtn");
+  if (!btn) return;
+  btn.disabled = _busy;
+  btn.classList.toggle("opacity-60", _busy);
+  btn.classList.toggle("pointer-events-none", _busy);
+  // [FIX] timeout guard: اگر بعد از 35 ثانیه هنوز busy بود، آزاد کن
+  if (_busy) {
+    clearTimeout(_saveTimeout);
+    _saveTimeout = setTimeout(() => setBusy(false), 35000);
+  } else {
+    clearTimeout(_saveTimeout);
+  }
+}
+
+function setStatus(text, color, isEditing) {
+  const dot = $("statusDot"), txt = $("statusText"), badge = $("editingBadge");
+  if (dot) dot.className = `w-2 h-2 rounded-full ${color || "bg-gray-300"}`;
+  if (txt) txt.textContent = text || "آماده";
+  if (badge) badge.classList.toggle("hidden", !isEditing);
+}
+
+function showToast(msg, type = "success") {
+  const t = $("toast");
+  if (!t) return;
+  t.textContent = msg;
+  t.className = `show ${type}`;
+  setTimeout(() => { t.className = type; }, 3500);
+}
+
+// ─── SELECT FILL ─────────────────────────────────────────────────────
+function fillSelect(id, items, current) {
+  const el = $(id);
+  if (!el) return;
+  const prev = current !== undefined ? current : el.value;
+  el.innerHTML = "";
+  const o0 = new Option("—", ""); el.add(o0);
+  const oNew = new Option("➕ افزودن...", "new"); el.add(oNew);
+  (items || []).forEach(v => el.add(new Option(v, v)));
+  if (prev && [...el.options].some(o => o.value === prev)) el.value = prev;
+}
+
+// ─── RADIO ───────────────────────────────────────────────────────────
+function getRadio(name) {
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : "";
+}
+function setRadio(name, value) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach(e => e.checked = (e.value === value));
+}
+
+// ─── RESET ───────────────────────────────────────────────────────────
+function resetForm() {
+  $("rowId").value = "";
+  $("originalSaverName").value = "";
+
+  ["date","name","code","count","packingCount","status",
+   "style","productionSupplierName","fabricSupplierName","fabric",
+   "stoneWash","packingName","finisher","controller","description"
+  ].forEach(id => { if ($(id)) $(id).value = ""; });
+
+  [
+    "size30_s","size31_s","size32_s","size33_s","size34_s","size36_s","size38_s","size40_s",
+    "size30_e","size31_e","size32_e","size33_e","size34_e","size36_e","size38_e","size40_e",
+    "size30_e2","size31_e2","size32_e2","size33_e2","size34_e2","size36_e2","size38_e2","size40_e2",
+    "size30_e3","size31_e3","size32_e3","size33_e3","size34_e3","size36_e3","size38_e3","size40_e3",
+    "size30_n","size31_n","size32_n","size33_n","size34_n","size36_n","size38_n","size40_n",
+    "stock_fabric","stock_wash","stock_production","saleable_count",
+    "different_wash","waste","stock_minus","stock_plus"
+  ].forEach(id => { if ($(id)) $(id).value = ""; });
+
+  ["btn","perch","pocketCard","sizeCard","hanger","band","leather"]
+    .forEach(id => { if ($(id)) $(id).checked = false; });
+
+  $("date").value = toJalali(new Date());
+  setRadio("bu", "رویال جین");
+  setRadio("bv", "نرمال");
+  setStatus("آماده", "bg-gray-300", false);
+}
+
+// ─── APPLY DATA ───────────────────────────────────────────────────────
+function applyData(obj) {
+  if (!obj || obj.error) { showToast(obj?.error || "اطلاعات پیدا نشد.", "error"); return; }
+
+  // [FIX] rowId را بلافاصله در فرم ذخیره کن
+  $("rowId").value = obj.rowId || "";
+  $("originalSaverName").value = obj.saverName || "";
+
+  $("date").value  = obj.date  || "";
+  $("name").value  = obj.name  || "";
+  $("code").value  = obj.code  || "";
+  $("count").value = obj.count ?? "";
+  $("packingCount").value = obj.packingCount ?? "";
+  $("status").value = obj.status || "";
+  $("packingName").value = obj.packingName || "";
+  $("fabricSupplierName").value = obj.fabricSupplierName || "";
+  $("productionSupplierName").value = obj.productionSupplierName || "";
+  $("fabric").value = obj.fabric || "";
+  $("stoneWash").value = obj.stoneWash || "";
+  $("style").value = obj.style || "";
+
+  [
+    ["size30_s","size31_s","size32_s","size33_s","size34_s","size36_s","size38_s","size40_s"],
+    ["size30_e","size31_e","size32_e","size33_e","size34_e","size36_e","size38_e","size40_e"],
+    ["size30_e2","size31_e2","size32_e2","size33_e2","size34_e2","size36_e2","size38_e2","size40_e2"],
+    ["size30_e3","size31_e3","size32_e3","size33_e3","size34_e3","size36_e3","size38_e3","size40_e3"],
+    ["size30_n","size31_n","size32_n","size33_n","size34_n","size36_n","size38_n","size40_n"],
+    ["stock_fabric","stock_wash","stock_production","saleable_count",
+     "different_wash","waste","stock_minus","stock_plus"]
+  ].flat().forEach(id => { if ($(id)) $(id).value = obj[id] ?? ""; });
+
+  const toBool = v => ["1","true","yes","✓"].includes(String(v ?? "").toLowerCase().trim());
+  ["btn","perch","pocketCard","sizeCard","hanger","band","leather"]
+    .forEach(id => { if ($(id)) $(id).checked = toBool(obj[id]); });
+
+  $("description").value = obj.description || "";
+  $("finisher").value    = obj.finisher    || "";
+  $("controller").value  = obj.controller  || "";
+  setRadio("bu", obj.bu || "رویال جین");
+  setRadio("bv", obj.bv || "نرمال");
+
+  setStatus(`کد: ${obj.code}`, "bg-primary", true);
+}
+
+// ─── BUILD PAYLOAD ────────────────────────────────────────────────────
+function buildPayload() {
+  const code = fixSpaces($("code").value);
+  if (!code) throw new Error("کد کالا الزامی است.");
+  const date = fixSpaces($("date").value);
+  if (!date) throw new Error("تاریخ را وارد کنید.");
+  const status = fixSpaces($("status").value);
+  if (!status) throw new Error("وضعیت را انتخاب کنید.");
+
+  return {
+    rowId: $("rowId").value || "",
+    originalSaverName: $("originalSaverName").value || "",
+    date, name: fixSpaces($("name").value), code, status,
+
+    count: parseNum($("count").value),
+    packingCount: parseNum($("packingCount").value),
+
+    style: fixSpaces($("style").value),
+    productionSupplierName: fixSpaces($("productionSupplierName").value),
+    fabricSupplierName: fixSpaces($("fabricSupplierName").value),
+    fabric: fixSpaces($("fabric").value),
+    stoneWash: fixSpaces($("stoneWash").value),
+    packingName: fixSpaces($("packingName").value),
+
+    size30_s: parseNum($("size30_s").value), size31_s: parseNum($("size31_s").value),
+    size32_s: parseNum($("size32_s").value), size33_s: parseNum($("size33_s").value),
+    size34_s: parseNum($("size34_s").value), size36_s: parseNum($("size36_s").value),
+    size38_s: parseNum($("size38_s").value), size40_s: parseNum($("size40_s").value),
+
+    size30_e: parseNum($("size30_e").value), size31_e: parseNum($("size31_e").value),
+    size32_e: parseNum($("size32_e").value), size33_e: parseNum($("size33_e").value),
+    size34_e: parseNum($("size34_e").value), size36_e: parseNum($("size36_e").value),
+    size38_e: parseNum($("size38_e").value), size40_e: parseNum($("size40_e").value),
+
+    size30_e2: parseNum($("size30_e2").value), size31_e2: parseNum($("size31_e2").value),
+    size32_e2: parseNum($("size32_e2").value), size33_e2: parseNum($("size33_e2").value),
+    size34_e2: parseNum($("size34_e2").value), size36_e2: parseNum($("size36_e2").value),
+    size38_e2: parseNum($("size38_e2").value), size40_e2: parseNum($("size40_e2").value),
+
+    size30_e3: parseNum($("size30_e3").value), size31_e3: parseNum($("size31_e3").value),
+    size32_e3: parseNum($("size32_e3").value), size33_e3: parseNum($("size33_e3").value),
+    size34_e3: parseNum($("size34_e3").value), size36_e3: parseNum($("size36_e3").value),
+    size38_e3: parseNum($("size38_e3").value), size40_e3: parseNum($("size40_e3").value),
+
+    size30_n: parseNum($("size30_n").value), size31_n: parseNum($("size31_n").value),
+    size32_n: parseNum($("size32_n").value), size33_n: parseNum($("size33_n").value),
+    size34_n: parseNum($("size34_n").value), size36_n: parseNum($("size36_n").value),
+    size38_n: parseNum($("size38_n").value), size40_n: parseNum($("size40_n").value),
+
+    stock_fabric:    parseNum($("stock_fabric").value),
+    stock_wash:      parseNum($("stock_wash").value),
+    stock_production:parseNum($("stock_production").value),
+    saleable_count:  parseNum($("saleable_count").value),
+    different_wash:  parseNum($("different_wash").value),
+    waste:           parseNum($("waste").value),
+    stock_minus:     parseNum($("stock_minus").value),
+    stock_plus:      parseNum($("stock_plus").value),
+
+    btn:        $("btn").checked ? 1 : 0,
+    perch:      $("perch").checked ? 1 : 0,
+    pocketCard: $("pocketCard").checked ? 1 : 0,
+    sizeCard:   $("sizeCard").checked ? 1 : 0,
+    hanger:     $("hanger").checked ? 1 : 0,
+    band:       $("band").checked ? 1 : 0,
+    leather:    $("leather").checked ? 1 : 0,
+
+    description: fixSpaces($("description").value),
+    finisher:    fixSpaces($("finisher").value),
+    controller:  fixSpaces($("controller").value),
+
+    bu: getRadio("bu"),
+    bv: getRadio("bv")
+  };
+}
+
+// ─── ADD NEW ITEM ─────────────────────────────────────────────────────
+function wireAddNew(selectId) {
+  const el = $(selectId);
+  if (!el) return;
+  el.addEventListener("change", () => {
+    if (el.value !== "new") return;
+    const v = prompt("مقدار جدید را وارد کنید:");
+    el.value = "";
+    if (!v || !v.trim()) return;
+    google.script.run
+      .withSuccessHandler(r => {
+        reloadLists(() => {
+          if ($(selectId)) $(selectId).value = r?.value || v.trim();
+        });
+      })
+      .withFailureHandler(err => {
+        showToast("خطا در افزودن: " + (err?.message || "نامشخص"), "error");
+      })
+      .addDropdownItem(selectId, v.trim());
+  });
+}
+
+// ─── RELOAD LISTS ────────────────────────────────────────────────────
+function reloadLists(cb) {
+  google.script.run
+    .withSuccessHandler(res => {
+      fillSelect("style",                  res.styleList);
+      fillSelect("fabric",                 res.fabricList);
+      fillSelect("finisher",               res.finisherList);
+      fillSelect("controller",             res.controllerList);
+      fillSelect("fabricSupplierName",     res.fabricSuppliers);
+      fillSelect("productionSupplierName", res.productionSuppliers);
+      fillSelect("packingName",            res.packingNames);
+      fillSelect("stoneWash",              res.stoneWashers);
+      if ($("userEmail")) $("userEmail").textContent = res.userName || "—";
+      if (cb) cb();
+    })
+    .withFailureHandler(err => {
+      showToast("خطا در دریافت لیست‌ها: " + (err?.message || "نامشخص"), "error");
+    })
+    .getInitialData();
+}
+
+// ─── SEARCH ──────────────────────────────────────────────────────────
+function searchByCode(code) {
+  const c = fixSpaces(code);
+  if (!c) return;
+  setBusy(true);
+  setStatus("در حال جستجو...", "bg-yellow-400", false);
+  google.script.run
+    .withSuccessHandler(obj => {
+      setBusy(false);
+      if (obj?.error) { showToast(obj.error, "error"); setStatus("آماده","bg-gray-300",false); return; }
+      applyData(obj);
+      showToast(`کالا پیدا شد: ${obj.code}`, "success");
+    })
+    .withFailureHandler(err => {
+      setBusy(false);
+      setStatus("خطا", "bg-red-400", false);
+      showToast("خطا در جستجو: " + (err?.message || "نامشخص"), "error");
+    })
+    .searchOrderData(c);
+}
+
+// ─── SAVE ────────────────────────────────────────────────────────────
+function save() {
+  if (_busy) return;
+  let payload;
+  try { payload = buildPayload(); }
+  catch(e) { showToast(e.message || String(e), "error"); return; }
+
+  setBusy(true);
+  setStatus("در حال ذخیره...", "bg-yellow-400", false);
+
+  google.script.run
+    .withSuccessHandler(result => {
+      setBusy(false);
+      if (result && result.error) {
+        showToast(result.error, "error");
+        setStatus("خطا در ذخیره", "bg-red-400", false);
+        return;
+      }
+      // [FIX] rowId را از پاسخ سرور آپدیت کن تا ذخیره‌های بعدی update شوند نه insert
+      if (result && result.rowId) {
+        $("rowId").value = String(result.rowId);
+      }
+      const msg = (result && result.message) || "ذخیره شد ✔";
+      showToast(msg, "success");
+      setStatus(`ذخیره شد: ${payload.code}`, "bg-green-500", !!$("rowId").value);
+    })
+    .withFailureHandler(err => {
+      setBusy(false);
+      setStatus("خطا در ذخیره", "bg-red-400", false);
+      showToast("خطا در ذخیره: " + (err?.message || "نامشخص"), "error");
+    })
+    .saveOrderData(payload);
+}
+
+// ─── CALENDAR ────────────────────────────────────────────────────────
+function initCalendar() {
+  const inp = $("date");
+  if (!inp) return;
+  inp.setAttribute("data-jdp","");
+  inp.setAttribute("data-jdp-only-date","");
+  inp.setAttribute("autocomplete","off");
+  try {
+    if (window.jalaliDatepicker) {
+      jalaliDatepicker.startWatch({ autoHide:true, zIndex:9999, showTodayBtn:true, showEmptyBtn:true });
+      inp.addEventListener("focus", () => { try { jalaliDatepicker.show(inp); } catch(e){} });
+    }
+  } catch(e) {}
+}
+
+// ─── SIZE TAB ────────────────────────────────────────────────────────
+// Tab key در جدول سایزها ردیف به ردیف حرکت کند
+document.addEventListener("keydown", e => {
+  if (e.key !== "Tab") return;
+  const sizeInputs = [...document.querySelectorAll(".size-inp")];
+  const idx = sizeInputs.indexOf(document.activeElement);
+  if (idx < 0) return;
+  const next = sizeInputs[e.shiftKey ? idx-1 : idx+1];
+  if (next) { e.preventDefault(); next.focus(); next.select(); }
+});
+
+// ─── INIT ────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  initCalendar();
+
+  if ($("date") && !$("date").value) $("date").value = toJalali(new Date());
+
+  reloadLists(() => {
+    setRadio("bu","رویال جین");
+    setRadio("bv","نرمال");
+  });
+
+  ["style","fabric","finisher","controller",
+   "fabricSupplierName","productionSupplierName","packingName","stoneWash"]
+    .forEach(wireAddNew);
+
+  $("resetBtn")?.addEventListener("click", resetForm);
+  $("cancelBtn")?.addEventListener("click", () => { try { google.script.host.close(); } catch(e) {} });
+  $("saveBtn")?.addEventListener("click", save);
+
+  const doSearch = e => { if (e.key === "Enter") { e.preventDefault(); searchByCode(e.target.value); } };
+  $("searchCode")?.addEventListener("keydown", doSearch);
+  $("code")?.addEventListener("keydown", doSearch);
+
+  // نمایش badge کاربر
+  $("userBadge")?.classList.remove("hidden");
+});
+</script>
+</body>
+</html>

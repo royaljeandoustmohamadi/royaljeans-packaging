@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html class="light" dir="rtl" lang="fa">
+<head>
+  <base target="_top">
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>داشبورد یکپارچه</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jalaali-js@1.2.7/dist/jalaali.min.js"></script>
+  <script src="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#135bec",
+            "background-light": "#f6f6f8",
+            "background-dark": "#101622",
+          },
+          fontFamily: {
+            "display": ["Vazirmatn", "sans-serif"],
+            "body": ["Vazirmatn", "sans-serif"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+
+<style>
+  .scrollbar-hide::-webkit-scrollbar{display:none}
+  .tab-btn[aria-selected="true"]{background-color:rgba(19,91,236,.12); color:#135bec;}
+  .kpi-card{border:1px solid #f0f2f4;}
+  .dark .kpi-card{border-color:#2D3748;}
+</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex flex-col overflow-x-hidden text-[#111318] dark:text-white">
+
+<header class="bg-white dark:bg-[#1A202C] border-b border-[#f0f2f4] dark:border-[#2D3748] sticky top-0 z-50">
+  <div class="px-6 lg:px-10 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-8">
+      <div class="flex items-center gap-4 text-[#111318] dark:text-white">
+        <div class="size-8 flex items-center justify-center bg-primary/10 rounded-lg text-primary">
+          <span class="material-symbols-outlined">inventory_2</span>
+        </div>
+        <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">OMS</h2>
+      </div>
+      <div class="hidden md:flex flex-col min-w-40 !h-10 w-64">
+        <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+          <div class="text-[#616f89] flex border-none bg-[#f0f2f4] dark:bg-[#2D3748] items-center justify-center pr-4 rounded-r-lg border-l-0">
+            <span class="material-symbols-outlined text-[20px]">search</span>
+          </div>
+          <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111318] dark:text-white focus:outline-0 focus:ring-0 border-none bg-[#f0f2f4] dark:bg-[#2D3748] focus:border-none h-full placeholder:text-[#616f89] px-4 rounded-r-none border-r-0 pr-2 text-sm font-normal leading-normal text-right" placeholder="جستجو..." value=""/>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-8">
+      <nav class="hidden lg:flex items-center gap-6">
+        <a class="text-primary text-sm font-bold leading-normal" href="#">داشبورد</a>
+        <a class="text-[#111318] dark:text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">سفارشات</a>
+        <a class="text-[#111318] dark:text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">موجودی</a>
+        <a class="text-[#111318] dark:text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">گزارش‌ها</a>
+      </nav>
+      <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-white shadow-sm" style='background-image:url("https://lh3.googleusercontent.com/aida-public/AB6AXuCDtlze48-eAmiP8wTYXP5owF2_QT6CEFRq8rcIR5R4oXJ4VaZmhiqrVPS7Z81t2NuB-E4J3pnOVC8D3HKMH6Q3tOPXM7Z2h0eN1sVVavLeZSf3Hjo5pSHm5J6zttOwD7KH40uo8lcCZZPBt9MLxtHSDadOSxc0DbLak3QWl7WMcHZuxP_34hx0LCRXZvJtPIz3heiT3kEnzxWoC6AV-Dp6F4KOYT4zra44NKtR1ULP4YTbh3Z6bhJz6Yb5OFw70a95E0zG_otw_rbL");'></div>
+    </div>
+  </div>
+</header>
+
+<main class="flex-1 flex justify-center py-8 px-4 sm:px-6 lg:px-8">
+  <div class="w-full max-w-[1200px] flex flex-col gap-6">
+    <div class="flex flex-wrap gap-2 items-center text-sm">
+      <a class="text-[#616f89] font-medium hover:text-primary transition-colors" href="#">خانه</a>
+      <span class="text-[#616f89] material-symbols-outlined text-[16px] rotate-180">chevron_right</span>
+      <span class="text-[#111318] dark:text-white font-medium">داشبورد یکپارچه</span>
+    </div>
+
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div class="flex flex-col gap-2">
+        <h1 class="text-[#111318] dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">داشبورد یکپارچه</h1>
+        <p class="text-[#616f89] dark:text-[#A0AEC0] text-sm">تامین‌کننده‌ها + پیش‌نمایش موجودی و گزارش در یک صفحه</p>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <button class="px-4 py-2 rounded-lg bg-[#f0f2f4] dark:bg-[#2D3748] text-sm font-medium" id="btnOpenOrder">
+          باز کردن فرم سفارشات
+        </button>
+        <button class="px-4 py-2 rounded-lg bg-[#f0f2f4] dark:bg-[#2D3748] text-sm font-medium" id="btnOpenInventory">
+          باز کردن داشبورد موجودی
+        </button>
+        <button class="px-4 py-2 rounded-lg bg-[#f0f2f4] dark:bg-[#2D3748] text-sm font-medium" id="btnOpenReport">
+          باز کردن گزارش‌گیری
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white dark:bg-[#1A202C] border border-[#f0f2f4] dark:border-[#2D3748] rounded-xl p-2 shadow-sm">
+      <div class="flex gap-2 flex-wrap">
+        <button class="tab-btn px-4 py-2 rounded-lg text-sm font-bold" data-tab="suppliers" aria-selected="true">بهترین تامین‌کننده‌ها</button>
+        <button class="tab-btn px-4 py-2 rounded-lg text-sm font-medium" data-tab="inventory" aria-selected="false">موجودی (پیش‌نمایش)</button>
+        <button class="tab-btn px-4 py-2 rounded-lg text-sm font-medium" data-tab="reports" aria-selected="false">گزارش (خلاصه)</button>
+      </div>
+    </div>
+
+    <!-- Common filters -->
+    <div class="bg-white dark:bg-[#1A202C] border border-[#f0f2f4] dark:border-[#2D3748] rounded-xl p-4 shadow-sm">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+        <div>
+          <label class="text-xs text-[#616f89]">از تاریخ</label>
+          <input id="dateFrom" class="form-input mt-1 w-full rounded-lg bg-[#f0f2f4] dark:bg-[#2D3748] border-0" placeholder="1404/01/01">
+        </div>
+        <div>
+          <label class="text-xs text-[#616f89]">تا تاریخ</label>
+          <input id="dateTo" class="form-input mt-1 w-full rounded-lg bg-[#f0f2f4] dark:bg-[#2D3748] border-0" placeholder="1404/12/29">
+        </div>
+        <div>
+          <label class="text-xs text-[#616f89]">وضعیت</label>
+          <select id="status" class="form-select mt-1 w-full rounded-lg bg-[#f0f2f4] dark:bg-[#2D3748] border-0"></select>
+        </div>
+        <div>
+          <label class="text-xs text-[#616f89]">BU</label>
+          <select id="bu" class="form-select mt-1 w-full rounded-lg bg-[#f0f2f4] dark:bg-[#2D3748] border-0"></select>
+        </div>
+        <div>
+          <label class="text-xs text-[#616f89]">سطح سفارش</label>
+          <select id="bv" class="form-select mt-1 w-full rounded-lg bg-[#f0f2f4] dark:bg-[#2D3748] border-0"></select>
+        </div>
+        <div class="flex items-end gap-2">
+          <button id="btnRunActive" class="w-full px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold">اجرا</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Suppliers tab -->
+    <section id="tab-suppliers" class="flex flex-col gap-4">
+      <div class="bg-white dark:bg-[#1A202C] border border-[#f0f2f4] dark:border-[#2D3748] rounded-xl p-4 shadow-sm">
+        <div class="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
+          <div class="flex items-center gap-3 flex-wrap">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">star</span>
+              <h2 class="text-lg font-black">رتبه‌بندی تامین‌کننده‌ها</h2>
+            </div>
+            <p class="text-sm text-[#616f89] dark:text-[#A0AEC0]">امتیاز بر اساس ۵ عامل (نرمال‌شده به ازای هر ۱۰۰۰ عدد)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-xs text-[#616f89]">نوع تامین‌کننده</label>
+            <select id="supplierField" class="form-select rounded-lg bg-[#f0f2f4] dark:bg-[#2D3748] border-0"></select>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="border border-[#f0f2f4] dark:border-[#2D3748] rounded-xl p-3">
+            <h3 class="text-sm font-bold mb-3">وزن‌ها (۰ تا ۱۰۰)</h3>
+            <div class="space-y-3">
+              <div>
+                <div class="flex items-center justify-between text-xs">
+                  <span>استوک شست</span><span id="w-stockWash">20</span>
+                </div>
+                <input id="weightStockWash" type="range" min="0" max="100" value="20" class="w-full">
+              </div>
+              <div>
+                <div class="flex items-center justify-between text-xs">
+                  <span>استوک تولید</span><span id="w-stockProd">20</span>
+                </div>
+                <input id="weightStockProd" type="range" min="0" max="100" value="20" class="w-full">
+              </div>
+              <div>
+                <div class="flex items-center justify-between text-xs">
+                  <span>ضایعات</span><span id="w-waste">30</span>
+                </div>
+                <input id="weightWaste" type="range" min="0" max="100" value="30" class="w-full">
+              </div>
+              <div>
+                <div class="flex items-center justify-between text-xs">
+                  <span>کسری سنگشویی</span><span id="w-shortageWash">20</span>
+                </div>
+                <input id="weightShortageWash" type="range" min="0" max="100" value="20" class="w-full">
+              </div>
+              <div>
+                <div class="flex items-center justify-between text-xs">
+                  <span>اضافه سنگشویی</span><span id="w-extraWash">10</span>
+                </div>
+                <input id="weightExtraWash" type="range" min="0" max="100" value="10" class="w-full">
+              </div>
+            </div>
+          </div>
+
+          <div class="border border-[#f0f2f4] dark:border-[#2D3748] rounded-xl p-3">
+            <h3 class="text-sm font-bold mb-3">خروجی</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="kpi-card rounded-xl p-3">
+                <div class="text-xs text-[#616f89]">تعداد تامین‌کننده‌ها</div>
+                <div id="kpiSupplierCount" class="text-xl font-black mt-1">—</div>
+              </div>
+              <div class="kpi-card rounded-xl p-3">
+                <div class="text-xs text-[#616f89]">بهترین تامین‌کننده</div>
+                <div id="kpiBestSupplier" class="text-sm font-black mt-1 truncate">—</div>
+              </div>
+              <div class="kpi-card rounded-xl p-3">
+                <div class="text-xs text-[#616f89]">امتیاز بهترین</div>
+                <div id="kpiBestScore" class="text-xl font-black mt-1">—</div>
+              </div>
+              <div class="kpi-card rounded-xl p-3">
+                <div class="text-xs text-[#616f89]">مجموع رکوردها</div>
+                <div id="kpiRecords" class="text-xl font-black mt-1">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top cards -->
+      <div id="topCards" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+
+      <!-- Table -->
+      <div class="bg-white dark:bg-[#1A202C] border border-[#f0f2f4] dark:border-[#2D3748] rounded-xl p-4 shadow-sm overflow-auto">
+        <table class="min-w-[900px] w-full text-sm">
+          <thead class="text-[#616f89]">
+            <tr class="border-b border-[#f0f2f4] dark:border-[#2D3748]">
+              <th class="py-2 text-right">رتبه</th>
+              <th class="py-2 text-right">تامین‌کننده</th>
+              <th class="py-2 text-right">امتیاز</th>
+              <th class="py-2 text-right">مجموع تعداد کل</th>
+              <th class="py-2 text-right">استوک شست</th>
+              <th class="py-2 text-right">استوک تولید</th>
+              <th class="py-2 text-right">ضایعات</th>
+              <th class="py-2 text-right">کسری</th>
+              <th class="py-2 text-right">اضافه</th>
+            </tr>
+          </thead>
+          <tbody id="supplierTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Inventory tab -->
+    <section id="tab-inventory" class="hidden flex flex-col gap-4">
+      <div class="bg-white dark:bg-[#1A202C] border border-[#f0f2f4] dark:border-[#2D3748] rounded-xl p-4 shadow-sm">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <h2 class="text-lg font-black">پیش‌نمایش موجودی</h2>
+          <div class="text-sm text-[#616f89]">Top 50 بر اساس «تعداد قابل فروش»</div>
+        </div>
+        <div class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div class="kpi-card rounded-xl p-3"><div class="text-xs text-[#616f89]">استوک پارچه</div><div id="invKpiFabric" class="text-xl font-black mt-1">—</div></div>
+          <div class="kpi-card rounded-xl p-3"><div class="text-xs text-[#616f89]">استوک شست</div><div id="invKpiWash" class="text-xl font-black mt-1">—</div></div>
+          <div class="kpi-card rounded-xl p-3"><div class="text-xs text-[#616f89]">استوک تولید</div><div id="invKpiProd" class="text-xl font-black mt-1">—</div></div>
+          <div class="kpi-card rounded-xl p-3"><div class="text-xs text-[#616f89]">قابل فروش</div><div id="invKpiSale" class="text-xl font-black mt-1">—</div></div>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-[#1A202C] border border-[#f0f2f4] dark:border-[#2D3748] rounded-xl p-4 shadow-sm overflow-auto">
+        <table class="min-w-[1100px] w-full text-sm">
+          <thead class="text-[#616f89]">
+            <tr class="border-b border-[#f0f2f4] dark:border-[#2D3748]">
+              <th class="py-2 text-right">کد کالا</th>
+              <th class="py-2 text-right">نام کالا</th>
+              <th class="py-2 text-right">تولیدی</th>
+              <th class="py-2 text-right">سنگشویی</th>
+              <th class="py-2 text-right">استوک شست</th>
+              <th class="py-2 text-right">استوک تولید</th>
+              <th class="py-2 text-right">ضایعات</th>
+              <th class="py-2 text-right">کسری</th>
+              <th class="py-2 text-right">اضافه</th>
+              <th class="py-2 text-right">قابل فروش</th>
+            </tr>
+          </thead>
+          <tbody id="invTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Reports tab -->
+    <section id="tab-reports" class="hidden flex flex-col gap-4">
+      <div class="bg-white dark:bg-[#1A202C] border border-[#f0f2f4] dark:border-[#2D3748] rounded-xl p-4 shadow-sm">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <h2 class="text-lg font-black">گزارش خلاصه</h2>
+          <div class="flex items-center gap-2">
+            <label class="text-xs text-[#616f89]">گروه‌بندی بر اساس</label>
+            <select id="repGroupBy" class="form-select rounded-lg bg-[#f0f2f4] dark:bg-[#2D3748] border-0"></select>
+          </div>
+        </div>
+        <p class="text-sm text-[#616f89] dark:text-[#A0AEC0] mt-2">خروجی: مجموع تعداد کل + مجموع ضایعات/کسری/اضافه</p>
+      </div>
+      <div class="bg-white dark:bg-[#1A202C] border border-[#f0f2f4] dark:border-[#2D3748] rounded-xl p-4 shadow-sm overflow-auto">
+        <table class="min-w-[900px] w-full text-sm">
+          <thead class="text-[#616f89]">
+            <tr class="border-b border-[#f0f2f4] dark:border-[#2D3748]">
+              <th class="py-2 text-right" id="repColGroup">گروه</th>
+              <th class="py-2 text-right">مجموع تعداد کل</th>
+              <th class="py-2 text-right">مجموع ضایعات</th>
+              <th class="py-2 text-right">مجموع کسری</th>
+              <th class="py-2 text-right">مجموع اضافه</th>
+              <th class="py-2 text-right">تعداد رکورد</th>
+            </tr>
+          </thead>
+          <tbody id="repTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Busy overlay -->
+<div id="busy" class="hidden fixed inset-0 bg-black/30 z-[999] items-center justify-center">
+  <div class="bg-white dark:bg-[#1A202C] rounded-xl px-6 py-4 shadow-lg flex items-center gap-3">
+    <span class="material-symbols-outlined animate-spin">progress_activity</span>
+    <span class="text-sm font-bold">در حال پردازش...</span>
+  </div>
+</div>
+
+<script>
+  const $ = (s)=>document.querySelector(s);
+  const $$ = (s)=>Array.from(document.querySelectorAll(s));
+
+  function setBusy(on){
+    const b = $("#busy");
+    if(on){ b.classList.remove("hidden"); b.classList.add("flex"); }
+    else { b.classList.add("hidden"); b.classList.remove("flex"); }
+  }
+  function fmt(n){
+    const x = Number(n||0);
+    if(!isFinite(x)) return "0";
+    return x.toLocaleString("fa-IR", {maximumFractionDigits:0});
+  }
+
+  function getQuick(){
+    return {
+      dateFrom: ($("#dateFrom").value || "").trim(),
+      dateTo: ($("#dateTo").value || "").trim(),
+      status: ($("#status").value || "").trim(),
+      bu: ($("#bu").value || "").trim(),
+      bv: ($("#bv").value || "").trim()
+    };
+  }
+
+  function wireSliders(){
+    const map = [
+      ["weightStockWash","w-stockWash"],
+      ["weightStockProd","w-stockProd"],
+      ["weightWaste","w-waste"],
+      ["weightShortageWash","w-shortageWash"],
+      ["weightExtraWash","w-extraWash"]
+    ];
+    map.forEach(([inp,lab])=>{
+      const el = $("#"+inp), l = $("#"+lab);
+      const sync = ()=> l.textContent = String(el.value);
+      el.addEventListener("input", sync);
+      sync();
+    });
+  }
+
+  function openDialog(type){
+    setBusy(true);
+    google.script.run
+      .withSuccessHandler(()=>{ setBusy(false); google.script.host.close(); })
+      .withFailureHandler(err=>{ setBusy(false); alert(err.message || err); })
+      .openDialog(type);
+  }
+
+  function setActiveTab(tab){
+    $$(".tab-btn").forEach(btn=>{
+      const is = btn.dataset.tab === tab;
+      btn.setAttribute("aria-selected", is ? "true" : "false");
+      btn.classList.toggle("font-bold", is);
+      btn.classList.toggle("font-medium", !is);
+    });
+    ["suppliers","inventory","reports"].forEach(t=>{
+      $("#tab-"+t).classList.toggle("hidden", t!==tab);
+    });
+  }
+
+  function renderSupplierTop(res){
+    const top = res.top || [];
+    $("#kpiSupplierCount").textContent = fmt(res.total||0);
+    $("#kpiRecords").textContent = fmt((res.kpis && res.kpis.records) || 0);
+
+    if(top.length){
+      $("#kpiBestSupplier").textContent = top[0].supplier;
+      $("#kpiBestScore").textContent = top[0].score;
+    } else {
+      $("#kpiBestSupplier").textContent = "—";
+      $("#kpiBestScore").textContent = "—";
+    }
+
+    // cards
+    const cards = $("#topCards");
+    cards.innerHTML = "";
+    top.slice(0,9).forEach((s,idx)=>{
+      const medal = idx===0 ? "emoji_events" : (idx===1 ? "workspace_premium" : (idx===2 ? "military_tech" : "star"));
+      const html = `
+        <div class="bg-white dark:bg-[#1A202C] border border-[#f0f2f4] dark:border-[#2D3748] rounded-xl p-4 shadow-sm">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <div class="text-xs text-[#616f89]">رتبه ${idx+1}</div>
+              <div class="font-black truncate">${s.supplier}</div>
+              <div class="text-xs text-[#616f89] mt-1">مجموع تعداد کل: ${fmt(s.sumCount)}</div>
+            </div>
+            <div class="size-10 flex items-center justify-center bg-primary/10 rounded-lg text-primary shrink-0">
+              <span class="material-symbols-outlined">${medal}</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="flex items-center justify-between text-xs text-[#616f89]">
+              <span>امتیاز</span><span class="font-bold text-[#111318] dark:text-white">${s.score}</span>
+            </div>
+            <div class="h-2 bg-[#f0f2f4] dark:bg-[#2D3748] rounded-full overflow-hidden mt-2">
+              <div class="h-2 bg-primary rounded-full" style="width:${Math.max(0,Math.min(100,Number(s.score)||0))}%"></div>
+            </div>
+          </div>
+        </div>`;
+      cards.insertAdjacentHTML("beforeend", html);
+    });
+
+    // table (top 50)
+    const tbody = $("#supplierTable");
+    tbody.innerHTML = "";
+    (res.rows || []).slice(0,50).forEach((s,idx)=>{
+      const tr = document.createElement("tr");
+      tr.className = "border-b border-[#f0f2f4] dark:border-[#2D3748]";
+      tr.innerHTML = `
+        <td class="py-2">${idx+1}</td>
+        <td class="py-2 font-bold">${s.supplier}</td>
+        <td class="py-2">${s.score}</td>
+        <td class="py-2">${fmt(s.sumCount)}</td>
+        <td class="py-2">${fmt(s.stockWash)}</td>
+        <td class="py-2">${fmt(s.stockProd)}</td>
+        <td class="py-2">${fmt(s.waste)}</td>
+        <td class="py-2">${fmt(s.shortageWash)}</td>
+        <td class="py-2">${fmt(s.extraWash)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function runSuppliers(){
+    const req = {
+      supplierField: $("#supplierField").value,
+      quick: getQuick(),
+      topN: 10,
+      weights: {
+        stockWash: Number($("#weightStockWash").value),
+        stockProd: Number($("#weightStockProd").value),
+        waste: Number($("#weightWaste").value),
+        shortageWash: Number($("#weightShortageWash").value),
+        extraWash: Number($("#weightExtraWash").value)
+      }
+    };
+    setBusy(true);
+    google.script.run
+      .withSuccessHandler(res=>{ setBusy(false); renderSupplierTop(res||{}); })
+      .withFailureHandler(err=>{ setBusy(false); alert(err.message || err); })
+      .runSupplierDashboard(req);
+  }
+
+  function runInventoryPreview(){
+    const req = {
+      quick: getQuick(),
+      limit: 50,
+      columns: ["کد کالا","نام کالا","نام تولیدی","سنگشویی (انتخابی)","استوک شست","استوک تولید","ضایعات","کسری سنگشویی","اضافه سنگشویی","تعداد قابل فروش"]
+    };
+    setBusy(true);
+    google.script.run
+      .withSuccessHandler(res=>{
+        setBusy(false);
+        const k = (res && res.stockKpis) || {};
+        $("#invKpiFabric").textContent = fmt(k.stockFabric || 0);
+        $("#invKpiWash").textContent = fmt(k.stockWash || 0);
+        $("#invKpiProd").textContent = fmt(k.stockProd || 0);
+        $("#invKpiSale").textContent = fmt(k.saleable || 0);
+
+        const cols = res.columns || [];
+        const tbody = $("#invTable");
+        tbody.innerHTML = "";
+        (res.rows || []).forEach(r=>{
+          const get = (h)=> r[cols.indexOf(h)];
+          const tr = document.createElement("tr");
+          tr.className = "border-b border-[#f0f2f4] dark:border-[#2D3748]";
+          tr.innerHTML = `
+            <td class="py-2">${get("کد کالا")||""}</td>
+            <td class="py-2">${get("نام کالا")||""}</td>
+            <td class="py-2">${get("نام تولیدی")||""}</td>
+            <td class="py-2">${get("سنگشویی (انتخابی)")||""}</td>
+            <td class="py-2">${fmt(get("استوک شست"))}</td>
+            <td class="py-2">${fmt(get("استوک تولید"))}</td>
+            <td class="py-2">${fmt(get("ضایعات"))}</td>
+            <td class="py-2">${fmt(get("کسری سنگشویی"))}</td>
+            <td class="py-2">${fmt(get("اضافه سنگشویی"))}</td>
+            <td class="py-2 font-bold">${fmt(get("تعداد قابل فروش"))}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      })
+      .withFailureHandler(err=>{ setBusy(false); alert(err.message || err); })
+      .runInventory(req);
+  }
+
+  function runReportSummary(){
+    const g = $("#repGroupBy").value;
+    $("#repColGroup").textContent = g || "گروه";
+    const req = {
+      mode:"summary",
+      quick: getQuick(),
+      groupBy:[g],
+      metrics:[
+        {type:"sum", header:"تعداد کل", label:"مجموع تعداد کل"},
+        {type:"sum", header:"ضایعات", label:"مجموع ضایعات"},
+        {type:"sum", header:"کسری سنگشویی", label:"مجموع کسری سنگشویی"},
+        {type:"sum", header:"اضافه سنگشویی", label:"مجموع اضافه سنگشویی"},
+        {type:"count", label:"تعداد رکورد"}
+      ],
+      limit: 200,
+      offset: 0,
+      sort:{field:"مجموع تعداد کل", dir:"desc"}
+    };
+    setBusy(true);
+    google.script.run
+      .withSuccessHandler(res=>{
+        setBusy(false);
+        const cols = res.columns || [];
+        const tbody = $("#repTable");
+        tbody.innerHTML = "";
+        (res.rows||[]).forEach(r=>{
+          const get = (h)=> r[cols.indexOf(h)];
+          const tr = document.createElement("tr");
+          tr.className = "border-b border-[#f0f2f4] dark:border-[#2D3748]";
+          tr.innerHTML = `
+            <td class="py-2 font-bold">${get(g)||""}</td>
+            <td class="py-2">${fmt(get("مجموع تعداد کل"))}</td>
+            <td class="py-2">${fmt(get("مجموع ضایعات"))}</td>
+            <td class="py-2">${fmt(get("مجموع کسری سنگشویی"))}</td>
+            <td class="py-2">${fmt(get("مجموع اضافه سنگشویی"))}</td>
+            <td class="py-2">${fmt(get("تعداد رکورد"))}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      })
+      .withFailureHandler(err=>{ setBusy(false); alert(err.message || err); })
+      .runReport(req);
+  }
+
+  function runActive(){
+    const active = $$(".tab-btn").find(b=>b.getAttribute("aria-selected")==="true")?.dataset.tab || "suppliers";
+    if(active==="suppliers") return runSuppliers();
+    if(active==="inventory") return runInventoryPreview();
+    if(active==="reports") return runReportSummary();
+  }
+
+  function fillSelect(el, options, addAll=true){
+    el.innerHTML = "";
+    if(addAll) el.insertAdjacentHTML("beforeend", `<option value="">همه</option>`);
+    (options||[]).forEach(v=>{
+      if(!v) return;
+      el.insertAdjacentHTML("beforeend", `<option value="${v}">${v}</option>`);
+    });
+  }
+
+  function init(){
+    // datepicker
+    try{
+      jalaliDatepicker.startWatch({ time: false });
+      $("#dateFrom").setAttribute("data-jdp","true");
+      $("#dateTo").setAttribute("data-jdp","true");
+    }catch(e){ /* ignore */ }
+
+    wireSliders();
+
+    $("#btnOpenOrder").addEventListener("click", ()=>openDialog("order"));
+    $("#btnOpenInventory").addEventListener("click", ()=>openDialog("inventory"));
+    $("#btnOpenReport").addEventListener("click", ()=>openDialog("report"));
+
+    $$(".tab-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        setActiveTab(btn.dataset.tab);
+      });
+    });
+    $("#btnRunActive").addEventListener("click", runActive);
+
+    setBusy(true);
+    google.script.run
+      .withSuccessHandler(initData=>{
+        setBusy(false);
+        const d = initData || {};
+        fillSelect($("#status"), d.statusOptions || []);
+        fillSelect($("#bu"), d.buOptions || []);
+        fillSelect($("#bv"), d.bvOptions || []);
+
+        // supplier fields
+        const sf = $("#supplierField");
+        sf.innerHTML = "";
+        (d.supplierFields || []).forEach(o=>{
+          sf.insertAdjacentHTML("beforeend", `<option value="${o.value}">${o.label}</option>`);
+        });
+        sf.value = d.defaultSupplierField || "نام تولیدی";
+
+        // weights defaults
+        const w = d.defaultWeights || {};
+        $("#weightStockWash").value = w.stockWash ?? 20;
+        $("#weightStockProd").value = w.stockProd ?? 20;
+        $("#weightWaste").value = w.waste ?? 30;
+        $("#weightShortageWash").value = w.shortageWash ?? 20;
+        $("#weightExtraWash").value = w.extraWash ?? 10;
+        wireSliders();
+
+        // groupBy options for report
+        const gb = $("#repGroupBy");
+        const common = ["نام تولیدی","سنگشویی (انتخابی)","نام بسته بندی","تامین کننده پارچه","استایل","پارچه","وضعیت","BU","سطح سفارش"];
+        gb.innerHTML = "";
+        common.forEach(h=> gb.insertAdjacentHTML("beforeend", `<option value="${h}">${h}</option>`));
+        gb.value = "نام تولیدی";
+
+        // initial run
+        runSuppliers();
+      })
+      .withFailureHandler(err=>{
+        setBusy(false);
+        alert(err.message || err);
+      })
+      .getSupplierDashboardInit();
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+</script>
+
+</body>
+</html>

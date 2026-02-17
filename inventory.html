@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html class="light" dir="rtl" lang="fa">
+<head>
+  <base target="_top">
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>داشبورد موجودی</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jalaali-js@1.2.7/dist/jalaali.min.js"></script>
+  <script src="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#135bec",
+            "background-light": "#f6f6f8",
+            "background-dark": "#101622",
+          },
+          fontFamily: {
+            "display": ["Vazirmatn", "sans-serif"],
+            "body": ["Vazirmatn", "sans-serif"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+
+    :root{
+      --pri:#135bec; --pri2:#135bec;
+      --bg:#f6f6f8; --surface:#fff;
+      --ink:#111827; --muted:#6b7280;
+      --shadow: 0 8px 24px rgba(0,0,0,.08);
+      --radius:14px; --brd:#e9eaf2;
+      font-family: Vazir, system-ui, -apple-system, Segoe UI, sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0; background:var(--bg); color:var(--ink);}
+    body{margin:0; background:var(--bg); color:var(--ink);}
+    .app{height:100%; display:flex; flex-direction:column; gap:12px; min-height:0}
+    .card{background:var(--surface); border:1px solid var(--brd); border-radius:var(--radius); box-shadow:var(--shadow)}
+    .topbar{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; gap:10px; flex-wrap:wrap}
+    .ttl{font-weight:900}
+    .pill{display:inline-flex; align-items:center; padding:2px 10px; border-radius:999px; font-size:.82rem; background:#f3e8ff; color:var(--pri)}
+    .btn{border:1px solid var(--brd); background:#fff; padding:9px 12px; border-radius:12px; cursor:pointer; font:inherit}
+    .btn.primary{background:var(--pri); color:#fff; border-color:transparent}
+    .btn.small{padding:7px 10px; border-radius:11px; font-size:.92rem}
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+    select,input{width:100%; border:1px solid var(--brd); border-radius:12px; padding:9px 10px; font:inherit; background:#fff}
+    label{display:block; font-size:.85rem; color:var(--muted); margin:0 0 6px}
+    .main{flex:1; min-height:0; overflow:auto; padding:12px}
+    .grid{display:grid; gap:10px; grid-template-columns:repeat(6, minmax(160px, 1fr))}
+    @media (max-width:1200px){.grid{grid-template-columns:repeat(3, minmax(160px, 1fr))}}
+    @media (max-width:720px){.grid{grid-template-columns:1fr}}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .section{padding:12px 14px}
+    .h3{font-weight:800; margin:0 0 10px; display:flex; gap:8px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    .muted{color:var(--muted)}
+    .lists{display:grid; gap:12px; grid-template-columns:1fr 1fr}
+    @media (max-width:900px){.lists{grid-template-columns:1fr}}
+    .listBox{border:1px solid var(--brd); border-radius:14px; overflow:hidden}
+    .listBox .head{padding:10px 12px; background:#fafafe; border-bottom:1px solid var(--brd); display:flex; align-items:center; justify-content:space-between}
+    .listBox .body{margin:0; background:var(--bg); color:var(--ink);}
+    .item{display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--brd); border-radius:12px; margin-bottom:8px; background:#fff}
+    .item:last-child{margin-bottom:0}
+    .handle{cursor:grab; user-select:none; color:var(--muted)}
+    .itemName{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+    .iconBtn{border:1px solid var(--brd); background:#fff; border-radius:10px; padding:6px 8px; cursor:pointer}
+    .condRow{display:grid; gap:8px; grid-template-columns:1.3fr .9fr 1fr 1fr auto; align-items:end; margin-bottom:10px}
+    @media (max-width:900px){.condRow{grid-template-columns:1fr 1fr}}
+    .kpis{display:grid; gap:10px; grid-template-columns:repeat(4, minmax(160px, 1fr))}
+    @media (max-width:900px){.kpis{grid-template-columns:repeat(2, minmax(160px, 1fr))}}
+    .kpi{padding:10px 12px}
+    .kpi .v{font-size:1.15rem; font-weight:900}
+    table{width:100%; border-collapse:collapse}
+    th,td{border-bottom:1px solid var(--brd); padding:9px 8px; text-align:right; font-size:.95rem}
+    th{background:#fafafe; position:sticky; top:0; z-index:1}
+    .toast{position:fixed; inset-inline-start:16px; bottom:16px; background:#111827; color:#fff; padding:10px 12px; border-radius:12px; display:none; max-width:92vw}
+    .toast.show{display:block}
+    .busyCover{position:fixed; inset:0; background:rgba(0,0,0,.18); display:none; align-items:center; justify-content:center}
+    .busyCover.show{display:flex}
+    .spinner{width:30px; height:30px; border-radius:50%; border:3px solid rgba(255,255,255,.55); border-top-color:#fff; animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  
+/* tweaks for tailwind layout */
+.app{height:auto;}
+</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex flex-col overflow-x-hidden text-[#111318] dark:text-white">
+
+<header class="bg-white dark:bg-[#1A202C] border-b border-[#f0f2f4] dark:border-[#2D3748] sticky top-0 z-50">
+  <div class="px-6 lg:px-10 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-8">
+      <div class="flex items-center gap-4 text-[#111318] dark:text-white">
+        <div class="size-8 flex items-center justify-center bg-primary/10 rounded-lg text-primary">
+          <span class="material-symbols-outlined">inventory_2</span>
+        </div>
+        <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">OMS</h2>
+      </div>
+      <div class="hidden md:flex flex-col min-w-40 !h-10 w-64">
+        <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+          <div class="text-[#616f89] flex border-none bg-[#f0f2f4] dark:bg-[#2D3748] items-center justify-center pr-4 rounded-r-lg border-l-0">
+            <span class="material-symbols-outlined text-[20px]">search</span>
+          </div>
+          <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111318] dark:text-white focus:outline-0 focus:ring-0 border-none bg-[#f0f2f4] dark:bg-[#2D3748] focus:border-none h-full placeholder:text-[#616f89] px-4 rounded-r-none border-r-0 pr-2 text-sm font-normal leading-normal text-right" placeholder="جستجو..." value=""/>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-8">
+      <nav class="hidden lg:flex items-center gap-6">
+        <a class="text-[#111318] dark:text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">داشبورد</a>
+        <a class="text-[#111318] dark:text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">سفارشات</a>
+        <a class="text-primary text-sm font-bold leading-normal" href="#">موجودی</a>
+        <a class="text-[#111318] dark:text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">گزارش‌ها</a>
+      </nav>
+      <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-white shadow-sm" style='background-image:url("https://lh3.googleusercontent.com/aida-public/AB6AXuCDtlze48-eAmiP8wTYXP5owF2_QT6CEFRq8rcIR5R4oXJ4VaZmhiqrVPS7Z81t2NuB-E4J3pnOVC8D3HKMH6Q3tOPXM7Z2h0eN1sVVavLeZSf3Hjo5pSHm5J6zttOwD7KH40uo8lcCZZPBt9MLxtHSDadOSxc0DbLak3QWl7WMcHZuxP_34hx0LCRXZvJtPIz3heiT3kEnzxWoC6AV-Dp6F4KOYT4zra44NKtR1ULP4YTbh3Z6bhJz6Yb5OFw70a95E0zG_otw_rbL");'></div>
+    </div>
+  </div>
+</header>
+
+<main class="flex-1 flex justify-center py-8 px-4 sm:px-6 lg:px-8">
+  <div class="w-full max-w-[1200px] flex flex-col gap-6">
+    <div class="flex flex-wrap gap-2 items-center text-sm">
+      <a class="text-[#616f89] font-medium hover:text-primary transition-colors" href="#">خانه</a>
+      <span class="text-[#616f89] material-symbols-outlined text-[16px] rotate-180">chevron_right</span>
+      <span class="text-[#111318] dark:text-white font-medium">موجودی</span>
+    </div>
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div class="flex flex-col gap-2">
+        <h1 class="text-[#111318] dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">داشبورد موجودی</h1>
+        <p class="text-[#616f89] dark:text-[#A0AEC0] text-sm">نمایش سریع موجودی و KPIهای کلیدی</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="px-4 py-2 rounded-lg bg-[#f0f2f4] dark:bg-[#2D3748] text-sm font-medium" onclick="google.script.run.openDialog('order')">فرم سفارشات</button>
+        <button class="px-4 py-2 rounded-lg bg-[#f0f2f4] dark:bg-[#2D3748] text-sm font-medium" onclick="google.script.run.openDialog('report')">گزارش‌ها</button>
+      </div>
+    </div>
+    <div class="bg-white dark:bg-[#1A202C] border border-[#f0f2f4] dark:border-[#2D3748] rounded-xl p-3 md:p-4 shadow-sm">
+<div class="app">
+    <div class="card topbar">
+      <div class="row" style="gap:10px">
+        <div class="ttl">داشبورد موجودی <span class="pill">Inventory</span></div>
+      </div>
+      <div class="row" style="justify-content:flex-end">
+        <button class="btn small" id="resetBtn" type="button">پاکسازی</button>
+        <button class="btn small primary" id="runBtn" type="button">به‌روزرسانی</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="card section">
+        <div class="h3">
+          <div>فیلترها</div>
+          <div class="muted" style="font-size:.85rem">Ctrl/⌘ + Enter = اجرا</div>
+        </div>
+
+        <div class="grid">
+          <div>
+            <label>از تاریخ (جلالی)</label>
+            <div class="row" style="flex-wrap:nowrap">
+              <input id="dateFrom" placeholder="1404/01/01" autocomplete="off">
+              <button class="iconBtn" id="calFromBtn" type="button">📅</button>
+            </div>
+          </div>
+          <div>
+            <label>تا تاریخ (جلالی)</label>
+            <div class="row" style="flex-wrap:nowrap">
+              <input id="dateTo" placeholder="1404/12/29" autocomplete="off">
+              <button class="iconBtn" id="calToBtn" type="button">📅</button>
+            </div>
+          </div>
+          <div>
+            <label>کد کالا</label>
+            <input id="code" placeholder="مثلاً 1254">
+          </div>
+          <div>
+            <label>وضعیت</label>
+            <select id="status"></select>
+          </div>
+          <div>
+            <label>BU</label>
+            <select id="bu"></select>
+          </div>
+          <div>
+            <label>BV</label>
+            <select id="bv"></select>
+          </div>
+
+          <div>
+            <label>نام بسته‌بندی</label>
+            <select id="packingName"></select>
+          </div>
+          <div>
+            <label>نام تولیدی</label>
+            <select id="productionSupplierName"></select>
+          </div>
+          <div>
+            <label>تامین‌کننده پارچه</label>
+            <select id="fabricSupplierName"></select>
+          </div>
+          <div>
+            <label>سنگشویی</label>
+            <select id="stoneWash"></select>
+          </div>
+          <div>
+            <label>تکمیل‌کننده</label>
+            <select id="finisher"></select>
+          </div>
+          <div>
+            <label>کنترل‌کننده</label>
+            <select id="controller"></select>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="h3" style="margin-bottom:8px">
+            <div>فیلتر پیشرفته</div>
+            <div class="row">
+              <button class="btn small" id="addCondBtn" type="button">افزودن شرط</button>
+            </div>
+          </div>
+          <div id="condBox"></div>
+        </div>
+
+        <div class="row" style="margin-top:10px; justify-content:space-between">
+          <div class="row">
+            <div style="min-width:220px">
+              <label>مرتب‌سازی بر اساس</label>
+              <select id="sortField"></select>
+            </div>
+            <div style="min-width:160px">
+              <label>جهت</label>
+              <select id="sortDir">
+                <option value="desc">نزولی</option>
+                <option value="asc">صعودی</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div style="min-width:140px">
+              <label>تعداد در صفحه</label>
+              <input id="limit" type="number" value="500" min="1" max="5000">
+            </div>
+            <div style="min-width:140px">
+              <label>صفحه</label>
+              <select id="page"><option>1</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section" style="margin-top:12px">
+        <div class="h3">
+          <div>ستون‌ها</div>
+          <span class="muted" style="font-size:.85rem">Drag & Drop یا ▲▼</span>
+        </div>
+        <div class="lists">
+          <div class="listBox">
+            <div class="head">
+              <div>همه ستون‌ها</div>
+              <button class="btn small" id="addAllColsBtn" type="button">افزودن همه</button>
+            </div>
+            <div class="body" id="colAll"></div>
+          </div>
+          <div class="listBox">
+            <div class="head">
+              <div>ستون‌های انتخاب‌شده</div>
+              <button class="btn small" id="clearColsBtn" type="button">پاک کردن</button>
+            </div>
+            <div class="body" id="colSelected"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section" style="margin-top:12px">
+        <div class="h3">
+          <div>خلاصه موجودی</div>
+          <div class="muted" id="runInfo" style="font-size:.85rem"></div>
+        </div>
+
+        <div class="kpis" style="margin-bottom:10px">
+          <div class="kpi card" style="box-shadow:none; border:1px solid var(--brd)">
+            <div class="muted">قابل فروش</div>
+            <div class="v" id="kpiSaleable">—</div>
+          </div>
+          <div class="kpi card" style="box-shadow:none; border:1px solid var(--brd)">
+            <div class="muted">استوک پارچه</div>
+            <div class="v" id="kpiStockFabric">—</div>
+          </div>
+          <div class="kpi card" style="box-shadow:none; border:1px solid var(--brd)">
+            <div class="muted">استوک شست</div>
+            <div class="v" id="kpiStockWash">—</div>
+          </div>
+          <div class="kpi card" style="box-shadow:none; border:1px solid var(--brd)">
+            <div class="muted">استوک تولید</div>
+            <div class="v" id="kpiStockProd">—</div>
+          </div>
+        </div>
+
+        <div style="overflow:auto; border:1px solid var(--brd); border-radius:14px">
+          <table>
+            <thead><tr id="theadRow"></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="busyCover" id="busy"><div class="spinner"></div></div>
+
+<script>
+  const $ = (s)=>document.querySelector(s);
+
+  let headers = [];
+  let initLists = {};
+  let selectedColumns = [];
+  let conditions = [];
+  let defaultColumns = [];
+
+  function toast(msg){
+    const el=$('#toast');
+    el.textContent=msg;
+    el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'),2600);
+  }
+  function setBusy(flag){ $('#busy').classList.toggle('show', !!flag); }
+
+  function setupJdp(){
+    try{
+      const f=$('#dateFrom'), t=$('#dateTo');
+      [f,t].forEach(inp=>{
+        inp.setAttribute('data-jdp','');
+        inp.setAttribute('data-jdp-only-date','');
+        inp.setAttribute('autocomplete','off');
+      });
+      jalaliDatepicker.startWatch({
+        autoShow:false, autoHide:true, zIndex:9999,
+        showTodayBtn:true, showEmptyBtn:true, container:'body'
+      });
+      $('#calFromBtn').addEventListener('click', ()=> jalaliDatepicker.show(f));
+      $('#calToBtn').addEventListener('click', ()=> jalaliDatepicker.show(t));
+    }catch(e){}
+  }
+
+  function fillSelect(el, list, allowEmpty=true, emptyText='(همه)'){
+    el.innerHTML='';
+    if (allowEmpty){
+      const o=document.createElement('option'); o.value=''; o.textContent=emptyText; el.appendChild(o);
+    }
+    (list||[]).forEach(v=>{
+      const o=document.createElement('option'); o.value=v; o.textContent=v; el.appendChild(o);
+    });
+  }
+
+  function makeDraggable(container, items, onReorder){
+    container.innerHTML='';
+    items.forEach((it, idx)=>{
+      const row=document.createElement('div');
+      row.className='item';
+      row.draggable=true;
+      row.dataset.index=String(idx);
+
+      const handle=document.createElement('div');
+      handle.className='handle'; handle.textContent='⠿';
+      row.appendChild(handle);
+
+      const name=document.createElement('div');
+      name.className='itemName'; name.textContent = (it.label||it);
+      row.appendChild(name);
+
+      const up=document.createElement('button');
+      up.className='iconBtn'; up.type='button'; up.textContent='▲';
+      up.addEventListener('click', ()=>{
+        const i=Number(row.dataset.index); if(i<=0) return;
+        const copy=items.slice(); [copy[i-1],copy[i]]=[copy[i],copy[i-1]];
+        onReorder(copy);
+      });
+
+      const down=document.createElement('button');
+      down.className='iconBtn'; down.type='button'; down.textContent='▼';
+      down.addEventListener('click', ()=>{
+        const i=Number(row.dataset.index); if(i>=items.length-1) return;
+        const copy=items.slice(); [copy[i+1],copy[i]]=[copy[i],copy[i+1]];
+        onReorder(copy);
+      });
+
+      const rm=document.createElement('button');
+      rm.className='iconBtn'; rm.type='button'; rm.textContent='✕';
+      rm.addEventListener('click', ()=>{
+        const i=Number(row.dataset.index);
+        const copy=items.slice(); copy.splice(i,1);
+        onReorder(copy);
+      });
+
+      row.appendChild(up); row.appendChild(down); row.appendChild(rm);
+
+      row.addEventListener('dragstart', (e)=>{
+        e.dataTransfer.setData('text/plain', row.dataset.index);
+        e.dataTransfer.effectAllowed='move';
+      });
+      row.addEventListener('dragover', (e)=>{ e.preventDefault(); e.dataTransfer.dropEffect='move'; });
+      row.addEventListener('drop', (e)=>{
+        e.preventDefault();
+        const from=Number(e.dataTransfer.getData('text/plain'));
+        const to=Number(row.dataset.index);
+        if(Number.isNaN(from)||Number.isNaN(to)||from===to) return;
+        const copy=items.slice();
+        const [moved]=copy.splice(from,1);
+        copy.splice(to,0,moved);
+        onReorder(copy);
+      });
+
+      container.appendChild(row);
+    });
+  }
+
+  function renderConditions(){
+    const box=$('#condBox');
+    box.innerHTML='';
+    conditions.forEach((c, idx)=>{
+      const row=document.createElement('div');
+      row.className='condRow';
+
+      const f=document.createElement('div'); f.innerHTML='<label>فیلد</label>';
+      const selF=document.createElement('select');
+      headers.forEach(h=>{
+        const o=document.createElement('option'); o.value=h; o.textContent=h;
+        if(c.field===h) o.selected=true;
+        selF.appendChild(o);
+      });
+      selF.addEventListener('change', ()=>{ conditions[idx].field=selF.value; renderConditions(); });
+      f.appendChild(selF);
+
+      const o=document.createElement('div'); o.innerHTML='<label>عملگر</label>';
+      const selO=document.createElement('select');
+      const ops=[['contains','شامل'],['eq','برابر'],['neq','نابرابر'],['gt','>'],['gte','≥'],['lt','<'],['lte','≤'],['between','بین'],['isEmpty','خالی'],['isNotEmpty','خالی نیست']];
+      ops.forEach(([v,t])=>{
+        const oo=document.createElement('option'); oo.value=v; oo.textContent=t;
+        if((c.op||'contains')===v) oo.selected=true;
+        selO.appendChild(oo);
+      });
+      selO.addEventListener('change', ()=>{ conditions[idx].op=selO.value; renderConditions(); });
+      o.appendChild(selO);
+
+      const v1=document.createElement('div'); v1.innerHTML='<label>مقدار ۱</label>';
+      const in1=document.createElement('input'); in1.value=c.v1||''; in1.addEventListener('input', ()=>conditions[idx].v1=in1.value);
+      v1.appendChild(in1);
+
+      const v2=document.createElement('div'); v2.innerHTML='<label>مقدار ۲</label>';
+      const in2=document.createElement('input'); in2.value=c.v2||''; in2.addEventListener('input', ()=>conditions[idx].v2=in2.value);
+      v2.appendChild(in2);
+
+      const x=document.createElement('button'); x.className='btn small'; x.type='button'; x.textContent='حذف';
+      x.addEventListener('click', ()=>{ conditions.splice(idx,1); renderConditions(); });
+
+      row.appendChild(f); row.appendChild(o); row.appendChild(v1); row.appendChild(v2); row.appendChild(x);
+
+      const opv=(c.op||'contains').toLowerCase();
+      const needsAny = !(opv==='isempty'||opv==='isnotempty');
+      const needsV2 = opv==='between';
+      v1.style.display = needsAny ? '' : 'none';
+      v2.style.display = (needsAny && needsV2) ? '' : 'none';
+
+      box.appendChild(row);
+    });
+    rebuildSortFieldOptions();
+  }
+
+  function renderAllColumns(){
+    const box=$('#colAll');
+    box.innerHTML='';
+    headers.forEach(h=>{
+      const b=document.createElement('button');
+      b.className='btn small'; b.type='button';
+      b.style.width='100%'; b.style.textAlign='right';
+      b.textContent=(selectedColumns.includes(h)?'✓ ':'')+h;
+      b.disabled=selectedColumns.includes(h);
+      b.addEventListener('click', ()=>{
+        if(!selectedColumns.includes(h)){
+          selectedColumns=selectedColumns.concat([h]);
+          renderSelectedColumns(); renderAllColumns(); rebuildSortFieldOptions();
+        }
+      });
+      box.appendChild(b);
+    });
+  }
+  function renderSelectedColumns(){
+    makeDraggable($('#colSelected'), selectedColumns, (arr)=>{
+      selectedColumns=arr.slice();
+      renderSelectedColumns(); renderAllColumns(); rebuildSortFieldOptions();
+    });
+  }
+  function rebuildSortFieldOptions(){
+    const el=$('#sortField');
+    const opts = selectedColumns.length ? selectedColumns.slice() : headers.slice();
+    el.innerHTML='';
+    opts.forEach(v=>{
+      const o=document.createElement('option'); o.value=v; o.textContent=v; el.appendChild(o);
+    });
+  }
+
+  function buildQuick(){
+    return {
+      dateFrom: $('#dateFrom').value,
+      dateTo: $('#dateTo').value,
+      code: $('#code').value,
+      status: $('#status').value,
+      bu: $('#bu').value,
+      bv: $('#bv').value,
+      packingName: $('#packingName').value,
+      productionSupplierName: $('#productionSupplierName').value,
+      fabricSupplierName: $('#fabricSupplierName').value,
+      stoneWash: $('#stoneWash').value,
+      finisher: $('#finisher').value,
+      controller: $('#controller').value
+    };
+  }
+
+  function buildRequest(){
+    const req = {
+      quick: buildQuick(),
+      conditions: conditions.slice(),
+      sort: { field: $('#sortField').value, dir: $('#sortDir').value },
+      limit: Number($('#limit').value || 500),
+      offset: 0,
+      columns: selectedColumns.slice()
+    };
+    const p=Number($('#page').value||1);
+    req.offset=(p-1)*req.limit;
+    return req;
+  }
+
+  function run(){
+    const req = buildRequest();
+    setBusy(true);
+    $('#runInfo').textContent='';
+    google.script.run
+      .withSuccessHandler(res=>{ setBusy(false); renderResult(res); })
+      .withFailureHandler(err=>{ setBusy(false); toast('خطا: '+(err?.message||'نامشخص')); })
+      .runInventory(req);
+  }
+
+  function renderResult(res){
+    const total=Number(res.total||0);
+    const cols=res.columns||[];
+    const rows=res.rows||[];
+
+    // paging
+    const limit=Number($('#limit').value||500);
+    const pages=Math.max(1, Math.ceil(total/limit));
+    const pageEl=$('#page');
+    const cur=Number(pageEl.value||1);
+    pageEl.innerHTML='';
+    for(let i=1;i<=pages;i++){
+      const o=document.createElement('option'); o.value=String(i); o.textContent=String(i);
+      if(i===cur) o.selected=true;
+      pageEl.appendChild(o);
+    }
+    $('#runInfo').textContent = `کل: ${total} — صفحه‌ها: ${pages}`;
+
+    const sk = res.stockKpis || {};
+    $('#kpiSaleable').textContent = sk.saleable ?? '—';
+    $('#kpiStockFabric').textContent = sk.stockFabric ?? '—';
+    $('#kpiStockWash').textContent = sk.stockWash ?? '—';
+    $('#kpiStockProd').textContent = sk.stockProd ?? '—';
+
+    const thead=$('#theadRow'); thead.innerHTML='';
+    cols.forEach(c=>{ const th=document.createElement('th'); th.textContent=c; thead.appendChild(th); });
+    const tbody=$('#tbody'); tbody.innerHTML='';
+    rows.forEach(r=>{
+      const tr=document.createElement('tr');
+      cols.forEach((_,i)=>{
+        const td=document.createElement('td'); td.textContent = (r[i] ?? '');
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  function reset(){
+    $('#dateFrom').value='';
+    $('#dateTo').value='';
+    $('#code').value='';
+    $('#status').value='';
+    $('#bu').value='';
+    $('#bv').value='';
+    $('#packingName').value='';
+    $('#productionSupplierName').value='';
+    $('#fabricSupplierName').value='';
+    $('#stoneWash').value='';
+    $('#finisher').value='';
+    $('#controller').value='';
+    conditions=[]; renderConditions();
+    $('#page').innerHTML='<option>1</option>';
+  }
+
+  function init(){
+    setBusy(true);
+    google.script.run
+      .withSuccessHandler(res=>{
+        setBusy(false);
+        headers = (res && res.headers) ? res.headers.slice() : [];
+        initLists = (res && res.init) ? res.init : {};
+        defaultColumns = (res && res.defaultColumns) ? res.defaultColumns : [];
+
+        fillSelect($('#status'), (res.statusOptions||[]), true);
+        fillSelect($('#bu'), (res.buOptions||[]), true);
+        fillSelect($('#bv'), (res.bvOptions||[]), true);
+
+        fillSelect($('#packingName'), (initLists.packingNames||[]), true);
+        fillSelect($('#productionSupplierName'), (initLists.productionSuppliers||[]), true);
+        fillSelect($('#fabricSupplierName'), (initLists.fabricSuppliers||[]), true);
+        fillSelect($('#stoneWash'), (initLists.stoneWashers||[]), true);
+        fillSelect($('#finisher'), (initLists.finisherList||[]), true);
+        fillSelect($('#controller'), (initLists.controllerList||[]), true);
+
+        selectedColumns = defaultColumns.filter(h=>headers.includes(h));
+        if(!selectedColumns.length) selectedColumns = headers.slice(0, Math.min(12, headers.length));
+
+        renderAllColumns();
+        renderSelectedColumns();
+        renderConditions();
+
+        rebuildSortFieldOptions();
+        // default sort to "تعداد قابل فروش" if exists
+        if (selectedColumns.includes('تعداد قابل فروش')) $('#sortField').value='تعداد قابل فروش';
+        setupJdp();
+
+        toast('آماده‌ست. فیلترها و ستون‌ها را تنظیم کن.');
+      })
+      .withFailureHandler(err=>{
+        setBusy(false);
+        toast('خطا در راه‌اندازی: ' + (err?.message || 'نامشخص'));
+      })
+      .getInventoryInit();
+  }
+
+  // events
+  $('#runBtn').addEventListener('click', run);
+  $('#resetBtn').addEventListener('click', reset);
+  $('#page').addEventListener('change', run);
+  $('#addAllColsBtn').addEventListener('click', ()=>{
+    selectedColumns = headers.slice();
+    renderSelectedColumns(); renderAllColumns(); rebuildSortFieldOptions();
+  });
+  $('#clearColsBtn').addEventListener('click', ()=>{
+    selectedColumns = [];
+    renderSelectedColumns(); renderAllColumns(); rebuildSortFieldOptions();
+  });
+  $('#addCondBtn').addEventListener('click', ()=>{
+    conditions.push({field: headers[0] || 'تاریخ', op:'contains', v1:'', v2:''});
+    renderConditions();
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    if (e.key==='Enter' && (e.ctrlKey || e.metaKey)) run();
+    if (e.key==='Escape') google.script.host.close();
+  });
+
+  init();
+</script>
+    </div>
+  </div>
+</main>
+</body>
+</html>
