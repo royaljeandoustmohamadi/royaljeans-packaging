@@ -129,7 +129,7 @@ input[type=number] { -moz-appearance:textfield; }
         <div class="relative col-span-2">
           <input id="name" type="text" placeholder=" "
             class="fl-input block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 pt-1 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer placeholder-transparent"/>
-          <label class="fl-label absolute right-3 top-3 text-[#616f89] text-sm transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary pointer-events-none">نام کالا</label>
+          <label class="fl-label absolute right-3 top-3 text-[#616f89] text-sm transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary pointer-events-none">نام کالا *</label>
         </div>
 
         <!-- کد کالا -->
@@ -237,7 +237,7 @@ input[type=number] { -moz-appearance:textfield; }
       <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
         <!-- BU: نوع سفارش -->
         <div class="flex flex-col gap-2">
-          <span class="text-sm font-semibold text-[#616f89]">نوع سفارش (BU)</span>
+          <span class="text-sm font-semibold text-[#616f89]">نوع سفارش (BU) *</span>
           <div class="grid grid-cols-3 gap-1 p-1 bg-[#f0f2f4] dark:bg-[#2D3748] rounded-lg h-11 border border-[#dbdfe6] dark:border-[#4A5568]">
             <label class="cursor-pointer"><input class="sr-only peer" name="bu" type="radio" value="رویال جین"/>
               <span class="flex items-center justify-center w-full h-full rounded text-xs font-semibold text-[#616f89] transition-all">رویال جین</span></label>
@@ -249,7 +249,7 @@ input[type=number] { -moz-appearance:textfield; }
         </div>
         <!-- BV: سطح سفارش -->
         <div class="flex flex-col gap-2">
-          <span class="text-sm font-semibold text-[#616f89]">سطح سفارش (BV)</span>
+          <span class="text-sm font-semibold text-[#616f89]">سطح سفارش (BV) *</span>
           <div class="grid grid-cols-3 gap-1 p-1 bg-[#f0f2f4] dark:bg-[#2D3748] rounded-lg h-11 border border-[#dbdfe6] dark:border-[#4A5568]">
             <label class="cursor-pointer"><input class="sr-only peer" name="bv" type="radio" value="لارج"/>
               <span class="flex items-center justify-center w-full h-full rounded text-xs font-semibold text-[#616f89] transition-all">لارج</span></label>
@@ -364,6 +364,10 @@ input[type=number] { -moz-appearance:textfield; }
           <input id="stock_production" type="number" min="0" placeholder="0" class="w-full h-10 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
         </label>
         <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-bold text-[#616f89] uppercase tracking-wide">استوک بسته بندی</span>
+          <input id="stock_packaging" type="number" min="0" placeholder="0" class="w-full h-10 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
+        </label>
+        <label class="flex flex-col gap-1.5">
           <span class="text-xs font-bold text-[#616f89] uppercase tracking-wide">تعداد قابل فروش</span>
           <input id="saleable_count" type="number" min="0" placeholder="0" class="w-full h-10 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
         </label>
@@ -383,6 +387,10 @@ input[type=number] { -moz-appearance:textfield; }
           <span class="text-xs font-bold text-green-600 uppercase tracking-wide">اضافه سنگشویی</span>
           <input id="stock_plus" type="number" min="0" placeholder="0" class="w-full h-10 rounded-lg border border-green-200 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 px-3 text-sm text-center focus:ring-2 focus:ring-green-300 focus:border-green-400"/>
         </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-bold text-red-500 uppercase tracking-wide">کسری بسته بندی</span>
+          <input id="stock_packaging_minus" type="number" min="0" placeholder="0" class="w-full h-10 rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 px-3 text-sm text-center focus:ring-2 focus:ring-red-300 focus:border-red-400"/>
+        </label>
       </div>
     </section>
 
@@ -395,34 +403,34 @@ input[type=number] { -moz-appearance:textfield; }
           <span class="material-symbols-outlined text-primary text-[20px]">build</span>
           <h3 class="font-bold">ملزومات</h3>
         </div>
-        <div class="p-5 grid grid-cols-2 gap-2">
-          <label class="flex items-center gap-2 cursor-pointer group py-1.5">
-            <input id="btn" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
-            <span class="text-sm font-medium group-hover:text-primary transition-colors">دکمه</span>
+        <div class="p-5 grid grid-cols-1 gap-3">
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-semibold text-[#616f89]">تعداد دکمه</span>
+            <input id="btn" type="number" min="0" placeholder="0" class="w-full h-9 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
           </label>
-          <label class="flex items-center gap-2 cursor-pointer group py-1.5">
-            <input id="perch" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
-            <span class="text-sm font-medium group-hover:text-primary transition-colors">پرچ</span>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-semibold text-[#616f89]">تعداد پرچ</span>
+            <input id="perch" type="number" min="0" placeholder="0" class="w-full h-9 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
           </label>
-          <label class="flex items-center gap-2 cursor-pointer group py-1.5">
-            <input id="pocketCard" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
-            <span class="text-sm font-medium group-hover:text-primary transition-colors">کارت جیب</span>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-semibold text-[#616f89]">تعداد کارت جیب</span>
+            <input id="pocketCard" type="number" min="0" placeholder="0" class="w-full h-9 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
           </label>
-          <label class="flex items-center gap-2 cursor-pointer group py-1.5">
-            <input id="sizeCard" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
-            <span class="text-sm font-medium group-hover:text-primary transition-colors">کارت سایز</span>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-semibold text-[#616f89]">تعداد کارت سایز</span>
+            <input id="sizeCard" type="number" min="0" placeholder="0" class="w-full h-9 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
           </label>
-          <label class="flex items-center gap-2 cursor-pointer group py-1.5">
-            <input id="hanger" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
-            <span class="text-sm font-medium group-hover:text-primary transition-colors">آویز</span>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-semibold text-[#616f89]">تعداد آویز</span>
+            <input id="hanger" type="number" min="0" placeholder="0" class="w-full h-9 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
           </label>
-          <label class="flex items-center gap-2 cursor-pointer group py-1.5">
-            <input id="band" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
-            <span class="text-sm font-medium group-hover:text-primary transition-colors">بند</span>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-semibold text-[#616f89]">تعداد بند</span>
+            <input id="band" type="number" min="0" placeholder="0" class="w-full h-9 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
           </label>
-          <label class="flex items-center gap-2 cursor-pointer group py-1.5 col-span-2">
-            <input id="leather" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"/>
-            <span class="text-sm font-medium group-hover:text-primary transition-colors">مارک چرمی</span>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-semibold text-[#616f89]">تعداد چرم</span>
+            <input id="leather" type="number" min="0" placeholder="0" class="w-full h-9 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
           </label>
         </div>
       </section>
@@ -443,6 +451,15 @@ input[type=number] { -moz-appearance:textfield; }
             <label class="fl-label absolute right-3 -top-2 text-[0.7rem] text-[#616f89] bg-white dark:bg-[#1A202C] px-1 pointer-events-none">تکمیل کننده</label>
             <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">expand_more</span>
           </div>
+          <!-- کنترل اولیه -->
+          <div class="relative">
+            <select id="initialControl" class="fl-input appearance-none block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer">
+              <option value="">— کنترل اولیه</option>
+              <option value="new">➕ افزودن...</option>
+            </select>
+            <label class="fl-label absolute right-3 -top-2 text-[0.7rem] text-[#616f89] bg-white dark:bg-[#1A202C] px-1 pointer-events-none">کنترل اولیه</label>
+            <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">expand_more</span>
+          </div>
           <!-- کنترل کننده -->
           <div class="relative">
             <select id="controller" class="fl-input appearance-none block w-full h-11 rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer">
@@ -453,7 +470,7 @@ input[type=number] { -moz-appearance:textfield; }
             <span class="material-symbols-outlined absolute left-2 top-2.5 text-[#9ba3af] text-[18px] pointer-events-none">expand_more</span>
           </div>
           <!-- توضیحات -->
-          <div class="relative md:col-span-2">
+          <div class="relative">
             <textarea id="description" placeholder=" " rows="3"
               class="fl-input block w-full rounded-lg border border-[#dbdfe6] dark:border-[#4A5568] bg-white dark:bg-[#2D3748] dark:text-white px-3 pt-4 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary peer placeholder-transparent resize-y min-h-[80px]"></textarea>
             <label class="fl-label absolute right-3 top-3.5 text-[#616f89] text-sm transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary bg-white dark:bg-[#1A202C] px-1 pointer-events-none">توضیحات تکمیلی</label>
@@ -579,7 +596,7 @@ function resetForm() {
 
   ["date","name","code","count","packingCount","status",
    "style","productionSupplierName","fabricSupplierName","fabric",
-   "stoneWash","packingName","finisher","controller","description"
+   "stoneWash","packingName","finisher","initialControl","controller","description"
   ].forEach(id => { if ($(id)) $(id).value = ""; });
 
   [
@@ -588,12 +605,10 @@ function resetForm() {
     "size30_e2","size31_e2","size32_e2","size33_e2","size34_e2","size36_e2","size38_e2","size40_e2",
     "size30_e3","size31_e3","size32_e3","size33_e3","size34_e3","size36_e3","size38_e3","size40_e3",
     "size30_n","size31_n","size32_n","size33_n","size34_n","size36_n","size38_n","size40_n",
-    "stock_fabric","stock_wash","stock_production","saleable_count",
-    "different_wash","waste","stock_minus","stock_plus"
+    "stock_fabric","stock_wash","stock_production","stock_packaging","saleable_count",
+    "different_wash","waste","stock_minus","stock_plus","stock_packaging_minus",
+    "btn","perch","pocketCard","sizeCard","hanger","band","leather"
   ].forEach(id => { if ($(id)) $(id).value = ""; });
-
-  ["btn","perch","pocketCard","sizeCard","hanger","band","leather"]
-    .forEach(id => { if ($(id)) $(id).checked = false; });
 
   $("date").value = toJalali(new Date());
   setRadio("bu", "رویال جین");
@@ -628,16 +643,14 @@ function applyData(obj) {
     ["size30_e2","size31_e2","size32_e2","size33_e2","size34_e2","size36_e2","size38_e2","size40_e2"],
     ["size30_e3","size31_e3","size32_e3","size33_e3","size34_e3","size36_e3","size38_e3","size40_e3"],
     ["size30_n","size31_n","size32_n","size33_n","size34_n","size36_n","size38_n","size40_n"],
-    ["stock_fabric","stock_wash","stock_production","saleable_count",
-     "different_wash","waste","stock_minus","stock_plus"]
+    ["stock_fabric","stock_wash","stock_production","stock_packaging","saleable_count",
+     "different_wash","waste","stock_minus","stock_plus","stock_packaging_minus",
+     "btn","perch","pocketCard","sizeCard","hanger","band","leather"]
   ].flat().forEach(id => { if ($(id)) $(id).value = obj[id] ?? ""; });
-
-  const toBool = v => ["1","true","yes","✓"].includes(String(v ?? "").toLowerCase().trim());
-  ["btn","perch","pocketCard","sizeCard","hanger","band","leather"]
-    .forEach(id => { if ($(id)) $(id).checked = toBool(obj[id]); });
 
   $("description").value = obj.description || "";
   $("finisher").value    = obj.finisher    || "";
+  $("initialControl").value = obj.initialControl || "";
   $("controller").value  = obj.controller  || "";
   setRadio("bu", obj.bu || "رویال جین");
   setRadio("bv", obj.bv || "نرمال");
@@ -651,13 +664,19 @@ function buildPayload() {
   if (!code) throw new Error("کد کالا الزامی است.");
   const date = fixSpaces($("date").value);
   if (!date) throw new Error("تاریخ را وارد کنید.");
+  const name = fixSpaces($("name").value);
+  if (!name) throw new Error("نام کالا الزامی است.");
   const status = fixSpaces($("status").value);
   if (!status) throw new Error("وضعیت را انتخاب کنید.");
+  const bu = getRadio("bu");
+  if (!bu) throw new Error("نوع سفارش (BU) الزامی است.");
+  const bv = getRadio("bv");
+  if (!bv) throw new Error("سطح سفارش (BV) الزامی است.");
 
   return {
     rowId: $("rowId").value || "",
     originalSaverName: $("originalSaverName").value || "",
-    date, name: fixSpaces($("name").value), code, status,
+    date, name, code, status,
 
     count: parseNum($("count").value),
     packingCount: parseNum($("packingCount").value),
@@ -694,29 +713,32 @@ function buildPayload() {
     size34_n: parseNum($("size34_n").value), size36_n: parseNum($("size36_n").value),
     size38_n: parseNum($("size38_n").value), size40_n: parseNum($("size40_n").value),
 
-    stock_fabric:    parseNum($("stock_fabric").value),
-    stock_wash:      parseNum($("stock_wash").value),
-    stock_production:parseNum($("stock_production").value),
-    saleable_count:  parseNum($("saleable_count").value),
-    different_wash:  parseNum($("different_wash").value),
-    waste:           parseNum($("waste").value),
-    stock_minus:     parseNum($("stock_minus").value),
-    stock_plus:      parseNum($("stock_plus").value),
+    stock_fabric:          parseNum($("stock_fabric").value),
+    stock_wash:            parseNum($("stock_wash").value),
+    stock_production:      parseNum($("stock_production").value),
+    stock_packaging:       parseNum($("stock_packaging").value),
+    saleable_count:        parseNum($("saleable_count").value),
+    different_wash:        parseNum($("different_wash").value),
+    waste:                 parseNum($("waste").value),
+    stock_minus:           parseNum($("stock_minus").value),
+    stock_plus:            parseNum($("stock_plus").value),
+    stock_packaging_minus: parseNum($("stock_packaging_minus").value),
 
-    btn:        $("btn").checked ? 1 : 0,
-    perch:      $("perch").checked ? 1 : 0,
-    pocketCard: $("pocketCard").checked ? 1 : 0,
-    sizeCard:   $("sizeCard").checked ? 1 : 0,
-    hanger:     $("hanger").checked ? 1 : 0,
-    band:       $("band").checked ? 1 : 0,
-    leather:    $("leather").checked ? 1 : 0,
+    btn:        parseNum($("btn").value),
+    perch:      parseNum($("perch").value),
+    pocketCard: parseNum($("pocketCard").value),
+    sizeCard:   parseNum($("sizeCard").value),
+    hanger:     parseNum($("hanger").value),
+    band:       parseNum($("band").value),
+    leather:    parseNum($("leather").value),
 
-    description: fixSpaces($("description").value),
-    finisher:    fixSpaces($("finisher").value),
-    controller:  fixSpaces($("controller").value),
+    description:    fixSpaces($("description").value),
+    finisher:       fixSpaces($("finisher").value),
+    initialControl: fixSpaces($("initialControl").value),
+    controller:     fixSpaces($("controller").value),
 
-    bu: getRadio("bu"),
-    bv: getRadio("bv")
+    bu: bu,
+    bv: bv
   };
 }
 
@@ -750,6 +772,7 @@ function reloadLists(cb) {
       fillSelect("fabric",                 res.fabricList);
       fillSelect("finisher",               res.finisherList);
       fillSelect("controller",             res.controllerList);
+      fillSelect("initialControl",         res.initialControlList);
       fillSelect("fabricSupplierName",     res.fabricSuppliers);
       fillSelect("productionSupplierName", res.productionSuppliers);
       fillSelect("packingName",            res.packingNames);
@@ -802,13 +825,11 @@ function save() {
         setStatus("خطا در ذخیره", "bg-red-400", false);
         return;
       }
-      // [FIX] rowId را از پاسخ سرور آپدیت کن تا ذخیره‌های بعدی update شوند نه insert
-      if (result && result.rowId) {
-        $("rowId").value = String(result.rowId);
-      }
       const msg = (result && result.message) || "ذخیره شد ✔";
       showToast(msg, "success");
-      setStatus(`ذخیره شد: ${payload.code}`, "bg-green-500", !!$("rowId").value);
+      setStatus("آماده", "bg-gray-300", false);
+      // Reset form after successful save
+      resetForm();
     })
     .withFailureHandler(err => {
       setBusy(false);
@@ -855,7 +876,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setRadio("bv","نرمال");
   });
 
-  ["style","fabric","finisher","controller",
+  ["style","fabric","finisher","initialControl","controller",
    "fabricSupplierName","productionSupplierName","packingName","stoneWash"]
     .forEach(wireAddNew);
 

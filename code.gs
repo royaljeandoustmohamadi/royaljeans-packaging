@@ -18,11 +18,11 @@ const DATA_HEADERS = [
   "اقتصادی2 30","اقتصادی2 31","اقتصادی2 32","اقتصادی2 33","اقتصادی2 34","اقتصادی2 36","اقتصادی2 38","اقتصادی2 40",
   "اقتصادی3 30","اقتصادی3 31","اقتصادی3 32","اقتصادی3 33","اقتصادی3 34","اقتصادی3 36","اقتصادی3 38","اقتصادی3 40",
   "نمونه 30","نمونه 31","نمونه 32","نمونه 33","نمونه 34","نمونه 36","نمونه 38","نمونه 40",
-  "استوک پارچه","استوک شست","استوک تولید","تعداد قابل فروش",
-  "شست متفاوت","ضایعات","کسری سنگشویی","اضافه سنگشویی",
-  "ملزومات دکمه","ملزومات پرچ","ملزومات کارت جیب",
-  "ملزومات کارت سایز","ملزومات آویز","ملزومات بند","ملزومات چرم",
-  "توضیحات","تکمیل کننده","کنترل کننده","ثبت کننده","آخرین ویرایش توسط","BU","سطح سفارش"
+  "استوک پارچه","استوک شست","استوک تولید","استوک بسته بندی","تعداد قابل فروش",
+  "شست متفاوت","ضایعات","کسری سنگشویی","اضافه سنگشویی","کسری بسته بندی",
+  "تعداد دکمه","تعداد پرچ","تعداد کارت جیب",
+  "تعداد کارت سایز","تعداد آویز","تعداد بند","تعداد چرم",
+  "توضیحات","تکمیل کننده","کنترل اولیه","کنترل کننده","ثبت کننده","آخرین ویرایش توسط","BU","سطح سفارش"
 ];
 
 const DATA_SHEET_NAME      = "DATA";
@@ -107,13 +107,13 @@ function _getCache_() { return CacheService.getDocumentCache(); }
 function _numColSet_() {
   const set = {};
   [2,3].forEach(i => set[i] = true);
-  for (let i = 12; i <= 59; i++) set[i] = true;
+  for (let i = 12; i <= 61; i++) set[i] = true;
   return set;
 }
 
 function _textColSet_() {
   const set = {};
-  [1,4,5,6,7,8,9,11,67,68,69,70,71,72,73].forEach(i => set[i] = true);
+  [1,4,5,6,7,8,9,11,68,69,70,71,72,73,74,75].forEach(i => set[i] = true);
   return set;
 }
 
@@ -309,10 +309,11 @@ function getInitialData() {
       .flat().filter(v => String(v).trim() !== "");
   };
 
-  const styleList      = getList("استایل");
-  const fabricList     = getList("پارچه");
-  const finisherList   = getList("تکمیل کننده");
-  const controllerList = getList("کنترل کننده ها");
+  const styleList         = getList("استایل");
+  const fabricList        = getList("پارچه");
+  const finisherList      = getList("تکمیل کننده");
+  const controllerList    = getList("کنترل کننده ها");
+  const initialControlList = getList("کنترل کننده ها");
 
   let fabricSuppliers = [], productionSuppliers = [], packingNames = [], stoneWashers = [];
   const csh = ss.getSheetByName("پیمانکاران و تامین کنندگان");
@@ -328,7 +329,7 @@ function getInitialData() {
     });
   }
 
-  return { userName, styleList, fabricList, finisherList, controllerList,
+  return { userName, styleList, fabricList, finisherList, controllerList, initialControlList,
     fabricSuppliers, productionSuppliers, packingNames, stoneWashers };
 }
 
@@ -378,6 +379,7 @@ function addDropdownItem(selectId, rawValue) {
     case "fabric":                 return addSimple("پارچه");
     case "finisher":               return addSimple("تکمیل کننده");
     case "controller":             return addSimple("کنترل کننده ها");
+    case "initialControl":         return addSimple("کنترل کننده ها");
     case "packingName":            return addContractor("بسته بندی");
     case "fabricSupplierName":     return addContractor("پارچه");
     case "productionSupplierName": return addContractor("تولیدی");
@@ -415,14 +417,14 @@ function mapRowToObject_(row, rowId) {
     size34_n: at(48), size36_n: at(49), size38_n: at(50), size40_n: at(51),
 
     stock_fabric: at(52), stock_wash: at(53), stock_production: at(54),
-    saleable_count: at(55), different_wash: at(56), waste: at(57),
-    stock_minus: at(58), stock_plus: at(59),
+    stock_packaging: at(55), saleable_count: at(56), different_wash: at(57), 
+    waste: at(58), stock_minus: at(59), stock_plus: at(60), stock_packaging_minus: at(61),
 
-    btn: at(60), perch: at(61), pocketCard: at(62), sizeCard: at(63),
-    hanger: at(64), band: at(65), leather: at(66),
+    btn: at(62), perch: at(63), pocketCard: at(64), sizeCard: at(65),
+    hanger: at(66), band: at(67), leather: at(68),
 
-    description: at(67), finisher: at(68), controller: at(69),
-    saverName: at(70), editorName: at(71), bu: at(72), bv: at(73)
+    description: at(69), finisher: at(70), initialControl: at(71), controller: at(72),
+    saverName: at(73), editorName: at(74), bu: at(75), bv: at(76)
   };
 }
 
@@ -458,7 +460,10 @@ function saveOrderData(data) {
   const codeNorm = normalizeCodeBasic_(data.code);
   if (!codeNorm)                      return { error: "کد کالا الزامی است." };
   if (!String(data.date||"").trim())   return { error: "تاریخ الزامی است." };
+  if (!String(data.name||"").trim())   return { error: "نام کالا الزامی است." };
   if (!String(data.status||"").trim()) return { error: "وضعیت الزامی است." };
+  if (!String(data.bu||"").trim())     return { error: "نوع سفارش (BU) الزامی است." };
+  if (!String(data.bv||"").trim())     return { error: "سطح سفارش (BV) الزامی است." };
 
   const rowData = [
     data.date, data.name, data.count, data.packingCount,
@@ -476,13 +481,14 @@ function saveOrderData(data) {
     data.size30_n, data.size31_n, data.size32_n, data.size33_n,
     data.size34_n, data.size36_n, data.size38_n, data.size40_n,
 
-    data.stock_fabric, data.stock_wash, data.stock_production, data.saleable_count,
-    data.different_wash, data.waste, data.stock_minus, data.stock_plus,
+    data.stock_fabric, data.stock_wash, data.stock_production, data.stock_packaging,
+    data.saleable_count, data.different_wash, data.waste, data.stock_minus, 
+    data.stock_plus, data.stock_packaging_minus,
 
     data.btn, data.perch, data.pocketCard, data.sizeCard,
     data.hanger, data.band, data.leather,
 
-    data.description, data.finisher, data.controller,
+    data.description, data.finisher, data.initialControl, data.controller,
     data.originalSaverName || userName, userName, data.bu, data.bv
   ];
 
