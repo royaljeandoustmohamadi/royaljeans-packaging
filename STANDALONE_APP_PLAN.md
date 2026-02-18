@@ -150,15 +150,9 @@ npm create vite@latest frontend -- --template react
 ```bash
 npm install @chakra-ui/react @chakra-ui/icons @emotion/react @emotion/styled framer-motion
 ```
-- **Chakra UI**: کامپوننت‌های مدرن و قدرتمند با RTL support عالی
-- **مزایا**: 
-  - Accessibility-first (دسترسی‌پذیری بالا)
-  - Dark mode built-in
-  - Responsive design system
-  - RTL support کامل برای فارسی
-  - Composition based (انعطاف‌پذیر)
-  - TypeScript friendly
-  - مستندات عالی
+- **Chakra UI**: کامپوننت‌های زیبا با RTL support عالی
+- **مزایا**: سبک (50KB)، Accessible، Dark mode built-in
+- **جایگزین**: Ant Design (~500KB), Material-UI
 
 #### State Management
 ```bash
@@ -1036,237 +1030,114 @@ exports.getContractorStats = async (req, res) => {
 **File: frontend/src/pages/Login.jsx**
 ```jsx
 import { useState } from 'react';
-import {
-  Box,
-  Button,
-  Container,
-  FormControl,
-  FormLabel,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Stack,
-  Heading,
-  useToast,
-  Card,
-  CardBody,
-  Icon,
-} from '@chakra-ui/react';
-import { EmailIcon, LockIcon } from '@chakra-ui/icons';
-import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { Form, Input, Button, Card, message } from 'antd';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
-  const [isLoading, setIsLoading] = useState(false);
-  const toast = useToast();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { register, handleSubmit } = useForm();
-
-  const onSubmit = async (data) => {
-    setIsLoading(true);
+  
+  const onFinish = async (values) => {
+    setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', data);
+      const res = await axios.post('http://localhost:5000/api/auth/login', values);
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
-      
-      toast({
-        title: 'ورود موفقیت‌آمیز',
-        description: `خوش آمدید ${res.data.user.fullName}`,
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      
+      message.success('ورود موفقیت‌آمیز');
       navigate('/dashboard');
     } catch (error) {
-      toast({
-        title: 'خطا در ورود',
-        description: error.response?.data?.error || 'لطفا دوباره تلاش کنید',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
+      message.error(error.response?.data?.error || 'خطا در ورود');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
-
+  
   return (
-    <Box minH="100vh" bg="gray.50" display="flex" alignItems="center" justifyContent="center">
-      <Container maxW="md">
-        <Card>
-          <CardBody>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <Stack spacing={4}>
-                <Heading size="md" textAlign="center">ورود به سیستم رویال جینز</Heading>
-                
-                <FormControl isRequired>
-                  <FormLabel>ایمیل</FormLabel>
-                  <InputGroup>
-                    <InputLeftElement>
-                      <Icon as={EmailIcon} color="gray.400" />
-                    </InputLeftElement>
-                    <Input {...register('email')} type="email" placeholder="example@royaljeans.com" />
-                  </InputGroup>
-                </FormControl>
-
-                <FormControl isRequired>
-                  <FormLabel>رمز عبور</FormLabel>
-                  <InputGroup>
-                    <InputLeftElement>
-                      <Icon as={LockIcon} color="gray.400" />
-                    </InputLeftElement>
-                    <Input {...register('password')} type="password" placeholder="رمز عبور" />
-                  </InputGroup>
-                </FormControl>
-
-                <Button type="submit" colorScheme="brand" size="lg" isLoading={isLoading}>
-                  ورود
-                </Button>
-              </Stack>
-            </form>
-          </CardBody>
-        </Card>
-      </Container>
-    </Box>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Card title="ورود به سیستم رویال جینز" style={{ width: 400 }}>
+        <Form onFinish={onFinish} layout="vertical">
+          <Form.Item
+            name="email"
+            rules={[{ required: true, message: 'لطفا ایمیل را وارد کنید' }]}
+          >
+            <Input prefix={<UserOutlined />} placeholder="ایمیل" />
+          </Form.Item>
+          
+          <Form.Item
+            name="password"
+            rules={[{ required: true, message: 'لطفا رمز عبور را وارد کنید' }]}
+          >
+            <Input.Password prefix={<LockOutlined />} placeholder="رمز عبور" />
+          </Form.Item>
+          
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={loading} block>
+              ورود
+            </Button>
+          </Form.Item>
+        </Form>
+      </Card>
+    </div>
   );
 }
 ```
-
-**نکته**: برای مثال‌های کامل‌تر و جزئیات بیشتر، فایل `CHAKRA_UI_EXAMPLES.md` را مطالعه کنید.
 
 #### 3.2 Order Form (3 روز)
 
 **File: frontend/src/pages/Orders/OrderForm.jsx**
 ```jsx
-// مشابه dialog.html فعلی اما با React و Chakra UI
-import { useState } from 'react';
-import {
-  Box,
-  Button,
-  Card,
-  CardHeader,
-  CardBody,
-  Heading,
-  FormControl,
-  FormLabel,
-  Input,
-  Select,
-  NumberInput,
-  NumberInputField,
-  SimpleGrid,
-  Stack,
-  useToast,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Badge,
-} from '@chakra-ui/react';
-import { useForm } from 'react-hook-form';
+// مشابه dialog.html فعلی اما با React و Ant Design
+import { Form, Input, Select, InputNumber, DatePicker, Button, Card, Row, Col, message } from 'antd';
+import { useForm, Controller } from 'react-hook-form';
 import axios from 'axios';
 
 export default function OrderForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const toast = useToast();
-  const { register, handleSubmit, reset } = useForm();
+  const { control, handleSubmit, reset } = useForm();
   
   const onSubmit = async (data) => {
-    setIsLoading(true);
     try {
       const token = localStorage.getItem('token');
       await axios.post('http://localhost:5000/api/orders', data, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      toast({
-        title: 'سفارش با موفقیت ثبت شد',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      
+      message.success('سفارش با موفقیت ثبت شد');
       reset();
     } catch (error) {
-      toast({
-        title: 'خطا در ثبت سفارش',
-        description: error.response?.data?.error || 'لطفا دوباره تلاش کنید',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    } finally {
-      setIsLoading(false);
+      message.error(error.response?.data?.error || 'خطا در ثبت سفارش');
     }
   };
   
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing={6}>
-        <Card>
-          <CardHeader>
-            <Heading size="md">اطلاعات پایه</Heading>
-          </CardHeader>
-          <CardBody>
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-              <FormControl isRequired>
-                <FormLabel>کد کالا</FormLabel>
-                <Input {...register('code', { required: true })} placeholder="RJ-1234" />
-              </FormControl>
-              
-              <FormControl isRequired>
-                <FormLabel>نام کالا</FormLabel>
-                <Input {...register('name', { required: true })} placeholder="نام محصول" />
-              </FormControl>
-              
-              {/* ... سایر فیلدها */}
-            </SimpleGrid>
-          </CardBody>
-        </Card>
-        
-        {/* جدول سایزبندی */}
-        <Card>
-          <CardHeader>
-            <Heading size="md">سایزبندی</Heading>
-          </CardHeader>
-          <CardBody overflowX="auto">
-            <Table size="sm">
-              <Thead>
-                <Tr>
-                  <Th>نوع</Th>
-                  <Th>30</Th>
-                  <Th>31</Th>
-                  {/* ... سایر سایزها */}
-                </Tr>
-              </Thead>
-              <Tbody>
-                <Tr>
-                  <Td><Badge colorScheme="green">سالم</Badge></Td>
-                  <Td>
-                    <NumberInput size="sm">
-                      <NumberInputField {...register('size30_s')} />
-                    </NumberInput>
-                  </Td>
-                  {/* ... سایر ستون‌ها */}
-                </Tr>
-              </Tbody>
-            </Table>
-          </CardBody>
-        </Card>
-        
-        <Button type="submit" colorScheme="brand" size="lg" isLoading={isLoading}>
-          ذخیره سفارش
-        </Button>
-      </Stack>
-    </form>
+    <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
+      <Card title="اطلاعات پایه">
+        <Row gutter={16}>
+          <Col span={8}>
+            <Controller
+              name="code"
+              control={control}
+              rules={{ required: 'کد کالا الزامی است' }}
+              render={({ field }) => (
+                <Form.Item label="کد کالا *">
+                  <Input {...field} />
+                </Form.Item>
+              )}
+            />
+          </Col>
+          {/* ... سایر فیلدها */}
+        </Row>
+      </Card>
+      
+      {/* ... باقی بخش‌ها */}
+      
+      <Button type="primary" htmlType="submit">
+        ذخیره سفارش
+      </Button>
+    </Form>
   );
 }
 ```
-
-**نکته**: برای کد کامل فرم با همه بخش‌ها، به فایل `CHAKRA_UI_EXAMPLES.md` مراجعه کنید.
 
 ---
 
