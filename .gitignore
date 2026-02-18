@@ -26,6 +26,8 @@ logs/
 # Database
 *.db
 *.sqlite
+# Except for development database
+!backend/dev.db
 
 # Backup files
 *.backup
