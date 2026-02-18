@@ -1,0 +1,229 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── USERS ────────────────────────────────────────────────────
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  password    String   // bcrypt hashed
+  fullName    String
+  role        String   @default("USER") // ADMIN, MANAGER, USER
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  orders      Order[]
+  evaluations ContractorEvaluation[]
+  auditLogs   AuditLog[]
+  
+  @@index([email])
+}
+
+// ─── ORDERS ───────────────────────────────────────────────────
+
+model Order {
+  id                    Int      @id @default(autoincrement())
+  code                  String   @unique
+  name                  String
+  date                  DateTime
+  status                String   @default("pending")
+  
+  // اطلاعات پایه
+  totalCount            Int?
+  packingCount          Int?
+  packingName           String?
+  fabricSupplier        String?
+  productionSupplier    String?
+  fabric                String?
+  stoneWash             String?
+  style                 String?
+  
+  // سایزبندی سالم (Healthy)
+  size30_healthy        Int?
+  size31_healthy        Int?
+  size32_healthy        Int?
+  size33_healthy        Int?
+  size34_healthy        Int?
+  size36_healthy        Int?
+  size38_healthy        Int?
+  size40_healthy        Int?
+  
+  // سایزبندی اقتصادی (Economy)
+  size30_economy        Int?
+  size31_economy        Int?
+  size32_economy        Int?
+  size33_economy        Int?
+  size34_economy        Int?
+  size36_economy        Int?
+  size38_economy        Int?
+  size40_economy        Int?
+  
+  // سایزبندی اقتصادی 2
+  size30_economy2       Int?
+  size31_economy2       Int?
+  size32_economy2       Int?
+  size33_economy2       Int?
+  size34_economy2       Int?
+  size36_economy2       Int?
+  size38_economy2       Int?
+  size40_economy2       Int?
+  
+  // سایزبندی اقتصادی 3
+  size30_economy3       Int?
+  size31_economy3       Int?
+  size32_economy3       Int?
+  size33_economy3       Int?
+  size34_economy3       Int?
+  size36_economy3       Int?
+  size38_economy3       Int?
+  size40_economy3       Int?
+  
+  // سایزبندی نمونه (Sample)
+  size30_sample         Int?
+  size31_sample         Int?
+  size32_sample         Int?
+  size33_sample         Int?
+  size34_sample         Int?
+  size36_sample         Int?
+  size38_sample         Int?
+  size40_sample         Int?
+  
+  // سایزبندی استوک (Stock)
+  size30_stock          Int?
+  size31_stock          Int?
+  size32_stock          Int?
+  size33_stock          Int?
+  size34_stock          Int?
+  size36_stock          Int?
+  size38_stock          Int?
+  size40_stock          Int?
+  
+  // موجودی
+  stockFabric           Int?
+  stockWash             Int?
+  stockProduction       Int?
+  stockPackaging        Int?
+  saleableCount         Int?
+  differentWash         Int?
+  waste                 Int?
+  stockMinus            Int?
+  stockPlus             Int?
+  stockPackagingMinus   Int?
+  
+  // ملزومات (Accessories)
+  accessories_button    Int?
+  accessories_rivet     Int?
+  accessories_pocketCard Int?
+  accessories_sizeCard  Int?
+  accessories_hanger    Int?
+  accessories_band      Int?
+  accessories_leather   Int?
+  
+  // پرسنل و توضیحات
+  description           String?
+  finisher              String?
+  initialControl        String?
+  controller            String?
+  bu                    String?  // نوع سفارش
+  bv                    String?  // سطح سفارش
+  
+  // Relations
+  createdBy             Int
+  creator               User       @relation(fields: [createdBy], references: [id])
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  
+  auditLogs             AuditLog[]
+  
+  @@index([code])
+  @@index([date])
+  @@index([status])
+  @@index([createdBy])
+}
+
+// ─── CONTRACTORS ──────────────────────────────────────────────
+
+model Contractor {
+  id          Int            @id @default(autoincrement())
+  name        String         @unique
+  type        String         // FABRIC, PRODUCTION, PACKAGING, STONE_WASH
+  phone       String?
+  address     String?
+  isActive    Boolean        @default(true)
+  notes       String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  // Relations
+  evaluations ContractorEvaluation[]
+  
+  @@index([type])
+  @@index([isActive])
+}
+
+// ─── CONTRACTOR EVALUATIONS ───────────────────────────────────
+
+model ContractorEvaluation {
+  id           Int        @id @default(autoincrement())
+  
+  // Relations
+  contractorId Int
+  contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+  
+  evaluatedBy  Int
+  evaluator    User       @relation(fields: [evaluatedBy], references: [id])
+  
+  // Ratings (1-5 scale)
+  rating       Int        // امتیاز کلی
+  quality      Int?       // کیفیت
+  timing       Int?       // زمانبندی
+  price        Int?       // قیمت
+  cooperation  Int?       // همکاری
+  
+  comments     String?
+  createdAt    DateTime   @default(now())
+  
+  @@index([contractorId])
+  @@index([evaluatedBy])
+  @@index([createdAt])
+}
+
+// ─── AUDIT LOGS ───────────────────────────────────────────────
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  
+  // Relations
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  
+  orderId   Int?
+  order     Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  
+  // Action details
+  action    String   // CREATE, UPDATE, DELETE, LOGIN, EXPORT, etc.
+  entity    String   // Order, User, Contractor, etc.
+  changes   String?  // تغییرات به صورت JSON string
+  
+  // Request info
+  ipAddress String?
+  userAgent String?
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+}

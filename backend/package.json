@@ -1,0 +1,37 @@
+{
+  "name": "royaljeans-backend",
+  "version": "1.0.0",
+  "description": "Royal Jeans Order Management System - Backend API",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
+  },
+  "keywords": [
+    "royaljeans",
+    "order-management",
+    "clothing"
+  ],
+  "author": "Royal Jeans Team",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@libsql/client": "^0.17.0",
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^3.0.3",
+    "compression": "^1.8.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "exceljs": "^4.4.0",
+    "express": "^4.22.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "prisma": "^5.22.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
