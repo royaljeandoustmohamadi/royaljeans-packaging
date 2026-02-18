@@ -1,22 +1,32 @@
-# Google Apps Script files
-.clasp.json
-.claspignore
+# Dependencies
+node_modules/
 
-# OS files
+# Environment files
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
 .DS_Store
 Thumbs.db
 
-# Editor directories and files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
 # Logs
 *.log
-npm-debug.log*
+logs/
 
-# Temporary files
-*.tmp
+# Database
+*.db
+*.sqlite
+
+# Backup files
+*.backup
 *.bak

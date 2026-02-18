@@ -5,96 +5,59 @@
 
 ---
 
-## 📚 مستندات
-
-- **[QUICK_START.md](./QUICK_START.md)** - شروع سریع در 15 دقیقه
-- **[BUILD_PLAN.md](./BUILD_PLAN.md)** - پلن اجرایی شروع ساخت برنامه
-- **[STANDALONE_APP_PLAN.md](./STANDALONE_APP_PLAN.md)** - پلن کامل پروژه
-- **[CHAKRA_UI_SETUP.md](./CHAKRA_UI_SETUP.md)** - راهنمای کامل Chakra UI
-- **[RTL_JALALI_GUIDE.md](./RTL_JALALI_GUIDE.md)** - راهنمای RTL و تاریخ شمسی ⭐
-- **[RTL_COMPONENTS_EXAMPLES.md](./RTL_COMPONENTS_EXAMPLES.md)** - مثال‌های کامل کامپوننت‌ها
-
----
-
 ## 🚀 ویژگی‌ها
 
-### ✅ فعلی (Google Sheets)
-- ✅ فرم ثبت کالا با 84 فیلد
-- ✅ سایزبندی 6 دسته (سالم، اقتصادی 1-3، نمونه، استوک)
-- ✅ جستجوی سریع با کد کالا
-- ✅ ذخیره‌سازی در Google Sheets
-
-### 🚧 در حال توسعه (Standalone App)
-- 🔐 **Authentication**: Login/Logout با JWT
-- 👥 **User Management**: مدیریت کاربران و نقش‌ها
-- 📦 **Order Management**: CRUD کامل سفارشات
-- 🏢 **Contractor Evaluation**: ارزیابی عملکرد پیمانکاران
-- 📊 **Reports & Analytics**: گزارش‌های پیشرفته
-- 📤 **Excel Export**: خروجی Excel برای بک‌آپ
-- 🔍 **Audit Logs**: ردگیری کامل تغییرات
-- 🌙 **Dark Mode**: پشتیبانی از حالت تاریک
+- **احراز هویت کامل**: سیستم Login/Logout با JWT
+- **مدیریت سفارشات**: CRUD کامل با 84 فیلد
+- **سایزبندی**: 6 دسته (سالم، اقتصادی 1-3، نمونه، استوک)
+- **مدیریت پیمانکاران**: با سیستم ارزیابی
+- **RTL کامل**: پشتیبانی کامل از زبان فارسی
+- **UI مدرن**: Chakra UI با پشتیبانی از Dark Mode
 
 ---
 
-## 🛠 Tech Stack
-
-### Frontend
-- **Framework**: React 18 + Vite
-- **UI Library**: Chakra UI (RTL Support)
-- **State**: Zustand
-- **Forms**: React Hook Form + Zod
-- **HTTP**: Axios
-- **Routing**: React Router v6
-- **تاریخ شمسی**: jalaali-js + react-modern-calendar-datepicker
-- **فونت**: Vazirmatn (بهترین فونت فارسی)
+## 🛠 تکنولوژی‌ها
 
 ### Backend
 - **Runtime**: Node.js 20
 - **Framework**: Express.js
-- **Database**: PostgreSQL 15
-- **ORM**: Prisma
+- **Database**: SQLite (Prisma ORM)
 - **Auth**: JWT + bcrypt
-- **Excel**: ExcelJS
 
-### DevOps
-- **Process Manager**: PM2
-- **Server**: Windows Server / Windows 10/11
+### Frontend
+- **Framework**: React 18 + Vite
+- **UI Library**: Chakra UI
+- **State Management**: Zustand
+- **Routing**: React Router v6
+- **Icons**: Lucide React
 
 ---
 
 ## 📁 ساختار پروژه
 
 ```
-royaljeans-app/
-├── frontend/                 # React + Chakra UI
+royaljeans-packaging/
+├── backend/                 # Node.js + Express + Prisma
 │   ├── src/
-│   │   ├── components/      # کامپوننت‌های قابل استفاده مجدد
-│   │   ├── pages/           # صفحات اصلی
-│   │   ├── services/        # API calls
-│   │   ├── store/           # State management
-│   │   ├── theme/           # Chakra UI theme
-│   │   └── utils/           # توابع کمکی
-│   └── package.json
-│
-├── backend/                  # Node.js + Express + Prisma
-│   ├── src/
-│   │   ├── controllers/     # منطق business
-│   │   ├── routes/          # API endpoints
-│   │   ├── middleware/      # Auth, validation, etc
-│   │   ├── services/        # سرویس‌های کمکی
-│   │   └── utils/           # توابع کمکی
+│   │   ├── index.js        # Entry point
+│   │   ├── routes/         # API Routes
+│   │   ├── middleware/     # Auth middleware
+│   │   └── utils/          # Utilities
 │   ├── prisma/
-│   │   └── schema.prisma    # Database schema
+│   │   └── schema.prisma   # Database schema
 │   └── package.json
 │
-├── docs/                     # مستندات
-│   ├── QUICK_START.md       # شروع سریع
-│   ├── STANDALONE_APP_PLAN.md
-│   ├── CHAKRA_UI_SETUP.md
-│   └── API.md               # API documentation
+├── frontend/                # React + Chakra UI
+│   ├── src/
+│   │   ├── components/     # Reusable components
+│   │   ├── pages/          # Page components
+│   │   ├── services/       # API services
+│   │   ├── store/          # State management
+│   │   ├── theme/          # Chakra UI theme
+│   │   └── utils/          # Utilities
+│   └── package.json
 │
-├── .gitignore
-└── README.md                 # این فایل
+└── README.md
 ```
 
 ---
@@ -102,323 +65,160 @@ royaljeans-app/
 ## 🚀 شروع سریع
 
 ### پیش‌نیازها
+- Node.js 20+
+- npm یا yarn
 
-- Node.js 20+ ([دانلود](https://nodejs.org/))
-- PostgreSQL 15+ ([دانلود](https://www.postgresql.org/download/windows/))
-- Git (اختیاری)
-
-### نصب
+### نصب Backend
 
 ```bash
-# Clone repository
-git clone <repository-url>
-cd royaljeans-app
-
-# Backend setup
 cd backend
-npm install
-npx prisma generate
-npx prisma migrate dev
-npm run dev
 
-# Frontend setup (در terminal جدید)
-cd frontend
+# نصب وابستگی‌ها
 npm install
+
+# کپی فایل environment
+cp .env.example .env
+
+# اجرای migration
+npx prisma migrate dev
+
+# اجرای سرور
 npm run dev
 ```
 
-**مستندات کامل**: [QUICK_START.md](./QUICK_START.md)
+سرور روی `http://localhost:5000` اجرا می‌شود.
+
+### نصب Frontend
+
+```bash
+cd frontend
+
+# نصب وابستگی‌ها
+npm install
+
+# کپی فایل environment
+cp .env.example .env
+
+# اجرای development server
+npm run dev
+```
+
+Frontend روی `http://localhost:5173` اجرا می‌شود.
 
 ---
 
 ## 📊 Database Schema
 
-### Models اصلی
+### جداول اصلی
 
-#### User (کاربران)
-```prisma
-model User {
-  id          Int      @id @default(autoincrement())
-  email       String   @unique
-  password    String   // bcrypt hashed
-  fullName    String
-  role        Role     @default(USER)
-  isActive    Boolean  @default(true)
-}
-
-enum Role {
-  ADMIN      // دسترسی کامل
-  MANAGER    // مدیریت + گزارشات
-  USER       // ثبت و مشاهده
-}
-```
-
-#### Order (سفارشات)
-```prisma
-model Order {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique
-  name        String
-  date        DateTime
-  status      String
-  
-  // 84 فیلد دیگر...
-  // سایزبندی (6 دسته × 8 سایز = 48 فیلد)
-  // موجودی و کسری (10 فیلد)
-  // ملزومات (7 فیلد)
-  // پرسنل (5 فیلد)
-  // اطلاعات پایه (14 فیلد)
-}
-```
-
-#### Contractor (پیمانکاران)
-```prisma
-model Contractor {
-  id          Int              @id
-  name        String           @unique
-  type        ContractorType   // FABRIC, PRODUCTION, etc
-  phone       String?
-  evaluations ContractorEvaluation[]
-}
-```
-
-**Schema کامل**: [STANDALONE_APP_PLAN.md](./STANDALONE_APP_PLAN.md#4-ساختار-دیتابیس)
+- **User**: کاربران سیستم با نقش‌های ADMIN, MANAGER, USER
+- **Order**: سفارشات با 84 فیلد شامل سایزبندی، موجودی، ملزومات
+- **Contractor**: پیمانکاران (پارچه، تولید، بسته‌بندی، سنگ‌شویی)
+- **ContractorEvaluation**: ارزیابی پیمانکاران
+- **AuditLog**: لاگ تغییرات
 
 ---
 
-## 🎨 UI Components (Chakra UI)
+## 🔐 API Endpoints
 
-### چرا Chakra UI?
+### Authentication
+- `POST /api/auth/register` - ثبت‌نام
+- `POST /api/auth/login` - ورود
+- `GET /api/auth/profile` - پروفایل کاربر
 
-| ویژگی | Chakra UI | Ant Design | Material-UI |
-|-------|-----------|------------|-------------|
-| **Bundle Size** | ~50KB ⚡ | ~500KB | ~300KB |
-| **RTL Support** | عالی ✅ | محدود ⚠️ | خوب 👍 |
-| **Dark Mode** | Built-in 🌙 | نیاز به setup | Built-in |
-| **Accessibility** | WCAG 2.1 ♿ | خوب | عالی |
-| **Customization** | عالی 🎨 | متوسط | خوب |
-| **Learning Curve** | آسان 📖 | متوسط | سخت |
+### Orders
+- `GET /api/orders` - لیست سفارشات
+- `POST /api/orders` - ایجاد سفارش
+- `GET /api/orders/:id` - جزئیات سفارش
+- `PUT /api/orders/:id` - ویرایش سفارش
+- `DELETE /api/orders/:id` - حذف سفارش
 
-### مثال کامپوننت
-
-```jsx
-import { Button, Card, CardBody, Heading } from '@chakra-ui/react';
-
-function OrderCard({ order }) {
-  return (
-    <Card>
-      <CardBody>
-        <Heading size="md">{order.name}</Heading>
-        <Button colorScheme="brand" mt={4}>
-          مشاهده جزئیات
-        </Button>
-      </CardBody>
-    </Card>
-  );
-}
-```
-
-**راهنمای کامل**: [CHAKRA_UI_SETUP.md](./CHAKRA_UI_SETUP.md)
+### Contractors
+- `GET /api/contractors` - لیست پیمانکاران
+- `POST /api/contractors` - ایجاد پیمانکار
+- `GET /api/contractors/:id` - جزئیات پیمانکار
+- `PUT /api/contractors/:id` - ویرایش پیمانکار
+- `DELETE /api/contractors/:id` - حذف پیمانکار
+- `POST /api/contractors/:id/evaluations` - ثبت ارزیابی
 
 ---
 
-## 🔐 Authentication Flow
+## 🎨 UI Components
 
+### صفحات ایجاد شده
+- **Login**: صفحه ورود با فرم ایمیل و رمز عبور
+- **Dashboard**: داشبورد با آمار کلی
+- **Orders List**: لیست سفارشات با جستجو و فیلتر
+- **Order Create**: فرم ثبت سفارش با 84 فیلد در تب‌های جداگانه
+- **Contractors List**: لیست پیمانکاران با فیلتر نوع
+
+### ویژگی‌های UI
+- پشتیبانی کامل RTL
+- فونت فارسی Vazirmatn
+- ریسپانسیو برای موبایل و دسکتاپ
+- Toast notifications
+- Form validation
+
+---
+
+## 🔧 تنظیمات
+
+### Backend `.env`
+```env
+DATABASE_URL="file:./dev.db"
+JWT_SECRET="your-secret-key"
+JWT_EXPIRES_IN="7d"
+PORT=5000
+NODE_ENV="development"
 ```
-┌─────────────┐
-│   Browser   │
-└──────┬──────┘
-       │ 1. POST /api/auth/login
-       │    { email, password }
-       ▼
-┌─────────────┐
-│   Backend   │──▶ 2. Verify password (bcrypt)
-└──────┬──────┘
-       │ 3. Generate JWT token
-       │
-       ▼
-┌─────────────┐
-│   Browser   │──▶ 4. Store token (localStorage)
-└──────┬──────┘
-       │ 5. All requests: Authorization: Bearer <token>
-       ▼
-┌─────────────┐
-│   Backend   │──▶ 6. Verify token (middleware)
-└─────────────┘
+
+### Frontend `.env`
+```env
+VITE_API_URL=http://localhost:5000/api
 ```
 
 ---
 
-## 📊 Features Roadmap
-
-### Phase 1: Core System (4 هفته) ✅ در حال انجام
-- [x] Setup project structure
-- [x] Authentication system
-- [ ] Order CRUD
-- [ ] Search & filters
-- [ ] Basic reports
-
-### Phase 2: Advanced Features (2 هفته)
-- [ ] Contractor evaluation
-- [ ] Excel export
-- [ ] Audit logs
-- [ ] Admin panel
-
-### Phase 3: Analytics (1 هفته)
-- [ ] Dashboard with charts
-- [ ] Advanced reports
-- [ ] Performance metrics
-
-### Phase 4: Mobile (2 هفته)
-- [ ] Responsive design optimization
-- [ ] PWA features
-- [ ] Offline support
-
----
-
-## 🧪 Testing
-
-```bash
-# Backend tests
-cd backend
-npm test
-
-# Frontend tests
-cd frontend
-npm test
-
-# E2E tests
-npm run test:e2e
-```
-
----
-
-## 📦 Deployment
-
-### Development
+## 🧪 تست
 
 ```bash
 # Backend
 cd backend
 npm run dev
 
-# Frontend
+# Frontend (ترمینال جدید)
 cd frontend
 npm run dev
 ```
 
-### Production
+---
 
+## 📦 Build برای Production
+
+### Frontend Build
 ```bash
-# Build frontend
 cd frontend
 npm run build
-
-# Deploy with PM2
-cd backend
-pm2 start src/app.js --name "royaljeans-api"
-pm2 start serve --name "royaljeans-web" -- -s ../frontend/dist -p 3000
-
-# Save configuration
-pm2 save
-pm2 startup
 ```
 
-**راهنمای کامل**: [STANDALONE_APP_PLAN.md](./STANDALONE_APP_PLAN.md#6-راهنمای-دیپلویمنت)
+فایل‌های build در پوشه `dist/` قرار می‌گیرند.
 
 ---
 
-## 🤝 Contributing
+## 📝 نکات مهم
 
-این پروژه یک سیستم داخلی است، اما پیشنهادات و بهبودها همیشه استقبال می‌شود.
-
-### قوانین Commit
-
-```bash
-feat: اضافه کردن ویژگی جدید
-fix: رفع باگ
-docs: تغییرات مستندات
-style: تغییرات formatting
-refactor: بازنویسی کد
-test: اضافه کردن تست
-chore: کارهای نگهداری
-```
+1. **امنیت**: حتماً JWT_SECRET را در production تغییر دهید
+2. **دیتابیس**: در حالت فعلی از SQLite استفاده می‌شود
+3. **CORS**: در development هر دو سرور روی localhost اجرا می‌شوند
 
 ---
 
-## 📝 License
+## 👥 نقش‌های کاربری
 
-این پروژه برای استفاده داخلی شرکت رویال جینز است.
-
----
-
-## 👥 Team
-
-- **Frontend**: React + Chakra UI
-- **Backend**: Node.js + Express + Prisma
-- **Database**: PostgreSQL
-- **DevOps**: PM2 + Windows Server
+- **ADMIN**: دسترسی کامل (حذف کاربران، همه عملیات)
+- **MANAGER**: مدیریت + گزارشات
+- **USER**: ثبت و مشاهده
 
 ---
 
-## 📞 Support
-
-برای سوالات و پشتیبانی:
-
-1. مستندات را بخوانید
-2. Issues را بررسی کنید
-3. تیم توسعه را مطلع کنید
-
----
-
-## 🎯 Performance Metrics
-
-### فعلی (Google Sheets)
-- ⏱️ زمان بارگذاری: 5-10s
-- 📊 حداکثر رکورد: ~1000
-- 👥 کاربران همزمان: 2-3
-- 💾 فضای ذخیره‌سازی: محدود
-
-### هدف (Standalone App)
-- ⚡ زمان بارگذاری: <1s
-- 📊 حداکثر رکورد: 1M+
-- 👥 کاربران همزمان: 50+
-- 💾 فضای ذخیره‌سازی: نامحدود
-- 🚀 سرعت: 10-100x سریع‌تر
-
----
-
-## 🔄 Version History
-
-### v2.0.0 (در حال توسعه)
-- 🆕 Standalone application
-- 🔐 Authentication system
-- 📊 Advanced reporting
-- 🏢 Contractor evaluation
-
-### v1.1.0 (فعلی - Google Sheets)
-- ✅ فرم 84 فیلدی
-- ✅ 6 دسته سایزبندی (شامل استوک)
-- ✅ جستجوی سریع
-- ✅ Dark mode UI
-
-### v1.0.0 (اولیه)
-- ✅ فرم پایه ثبت کالا
-- ✅ Google Sheets integration
-
----
-
-## 🌟 Highlights
-
-- 🎨 **Modern UI** با Chakra UI
-- ⚡ **سرعت بالا** با React + Vite
-- 🔒 **امن** با JWT authentication
-- 📱 **Responsive** برای همه دستگاه‌ها
-- 🌙 **Dark Mode** support
-- ♿ **Accessible** WCAG compliant
-- 🌍 **RTL** پشتیبانی کامل فارسی
-
----
-
-**ساخته شده با ❤️ برای رویال جینز**
-
+**ساخته شده برای رویال جینز** 🏭
