@@ -8,6 +8,7 @@
 ## 📚 مستندات
 
 - **[QUICK_START.md](./QUICK_START.md)** - شروع سریع در 15 دقیقه
+- **[BUILD_PLAN.md](./BUILD_PLAN.md)** - پلن اجرایی شروع ساخت برنامه
 - **[STANDALONE_APP_PLAN.md](./STANDALONE_APP_PLAN.md)** - پلن کامل پروژه
 - **[CHAKRA_UI_SETUP.md](./CHAKRA_UI_SETUP.md)** - راهنمای کامل Chakra UI
 - **[RTL_JALALI_GUIDE.md](./RTL_JALALI_GUIDE.md)** - راهنمای RTL و تاریخ شمسی ⭐
