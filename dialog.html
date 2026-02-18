@@ -339,6 +339,17 @@ input[type=number] { -moz-appearance:textfield; }
               <td class="p-1"><input id="size38_n" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
               <td class="p-1"><input id="size40_n" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
             </tr>
+            <tr id="row_stock">
+              <td class="pr-3 py-1.5"><span class="text-xs font-bold text-slate-600 bg-slate-50 dark:bg-slate-900/30 px-2 py-0.5 rounded-full">استوک</span></td>
+              <td class="p-1"><input id="size30_stock" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size31_stock" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size32_stock" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size33_stock" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size34_stock" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size36_stock" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size38_stock" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+              <td class="p-1"><input id="size40_stock" type="number" min="0" placeholder="0" class="size-inp w-full h-8 rounded border border-[#dbdfe6] dark:border-[#4A5568] dark:bg-[#2D3748] dark:text-white focus:ring-1 focus:ring-primary focus:border-primary"/></td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -605,6 +616,7 @@ function resetForm() {
     "size30_e2","size31_e2","size32_e2","size33_e2","size34_e2","size36_e2","size38_e2","size40_e2",
     "size30_e3","size31_e3","size32_e3","size33_e3","size34_e3","size36_e3","size38_e3","size40_e3",
     "size30_n","size31_n","size32_n","size33_n","size34_n","size36_n","size38_n","size40_n",
+    "size30_stock","size31_stock","size32_stock","size33_stock","size34_stock","size36_stock","size38_stock","size40_stock",
     "stock_fabric","stock_wash","stock_production","stock_packaging","saleable_count",
     "different_wash","waste","stock_minus","stock_plus","stock_packaging_minus",
     "btn","perch","pocketCard","sizeCard","hanger","band","leather"
@@ -643,6 +655,7 @@ function applyData(obj) {
     ["size30_e2","size31_e2","size32_e2","size33_e2","size34_e2","size36_e2","size38_e2","size40_e2"],
     ["size30_e3","size31_e3","size32_e3","size33_e3","size34_e3","size36_e3","size38_e3","size40_e3"],
     ["size30_n","size31_n","size32_n","size33_n","size34_n","size36_n","size38_n","size40_n"],
+    ["size30_stock","size31_stock","size32_stock","size33_stock","size34_stock","size36_stock","size38_stock","size40_stock"],
     ["stock_fabric","stock_wash","stock_production","stock_packaging","saleable_count",
      "different_wash","waste","stock_minus","stock_plus","stock_packaging_minus",
      "btn","perch","pocketCard","sizeCard","hanger","band","leather"]
@@ -712,6 +725,11 @@ function buildPayload() {
     size32_n: parseNum($("size32_n").value), size33_n: parseNum($("size33_n").value),
     size34_n: parseNum($("size34_n").value), size36_n: parseNum($("size36_n").value),
     size38_n: parseNum($("size38_n").value), size40_n: parseNum($("size40_n").value),
+
+    size30_stock: parseNum($("size30_stock").value), size31_stock: parseNum($("size31_stock").value),
+    size32_stock: parseNum($("size32_stock").value), size33_stock: parseNum($("size33_stock").value),
+    size34_stock: parseNum($("size34_stock").value), size36_stock: parseNum($("size36_stock").value),
+    size38_stock: parseNum($("size38_stock").value), size40_stock: parseNum($("size40_stock").value),
 
     stock_fabric:          parseNum($("stock_fabric").value),
     stock_wash:            parseNum($("stock_wash").value),

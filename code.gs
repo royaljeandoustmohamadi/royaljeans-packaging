@@ -18,6 +18,7 @@ const DATA_HEADERS = [
   "اقتصادی2 30","اقتصادی2 31","اقتصادی2 32","اقتصادی2 33","اقتصادی2 34","اقتصادی2 36","اقتصادی2 38","اقتصادی2 40",
   "اقتصادی3 30","اقتصادی3 31","اقتصادی3 32","اقتصادی3 33","اقتصادی3 34","اقتصادی3 36","اقتصادی3 38","اقتصادی3 40",
   "نمونه 30","نمونه 31","نمونه 32","نمونه 33","نمونه 34","نمونه 36","نمونه 38","نمونه 40",
+  "استوک 30","استوک 31","استوک 32","استوک 33","استوک 34","استوک 36","استوک 38","استوک 40",
   "استوک پارچه","استوک شست","استوک تولید","استوک بسته بندی","تعداد قابل فروش",
   "شست متفاوت","ضایعات","کسری سنگشویی","اضافه سنگشویی","کسری بسته بندی",
   "تعداد دکمه","تعداد پرچ","تعداد کارت جیب",
@@ -107,13 +108,13 @@ function _getCache_() { return CacheService.getDocumentCache(); }
 function _numColSet_() {
   const set = {};
   [2,3].forEach(i => set[i] = true);
-  for (let i = 12; i <= 61; i++) set[i] = true;
+  for (let i = 12; i <= 69; i++) set[i] = true;
   return set;
 }
 
 function _textColSet_() {
   const set = {};
-  [1,4,5,6,7,8,9,11,68,69,70,71,72,73,74,75].forEach(i => set[i] = true);
+  [1,4,5,6,7,8,9,11,76,77,78,79,80,81,82,83].forEach(i => set[i] = true);
   return set;
 }
 
@@ -416,15 +417,18 @@ function mapRowToObject_(row, rowId) {
     size30_n: at(44), size31_n: at(45), size32_n: at(46), size33_n: at(47),
     size34_n: at(48), size36_n: at(49), size38_n: at(50), size40_n: at(51),
 
-    stock_fabric: at(52), stock_wash: at(53), stock_production: at(54),
-    stock_packaging: at(55), saleable_count: at(56), different_wash: at(57), 
-    waste: at(58), stock_minus: at(59), stock_plus: at(60), stock_packaging_minus: at(61),
+    size30_stock: at(52), size31_stock: at(53), size32_stock: at(54), size33_stock: at(55),
+    size34_stock: at(56), size36_stock: at(57), size38_stock: at(58), size40_stock: at(59),
 
-    btn: at(62), perch: at(63), pocketCard: at(64), sizeCard: at(65),
-    hanger: at(66), band: at(67), leather: at(68),
+    stock_fabric: at(60), stock_wash: at(61), stock_production: at(62),
+    stock_packaging: at(63), saleable_count: at(64), different_wash: at(65), 
+    waste: at(66), stock_minus: at(67), stock_plus: at(68), stock_packaging_minus: at(69),
 
-    description: at(69), finisher: at(70), initialControl: at(71), controller: at(72),
-    saverName: at(73), editorName: at(74), bu: at(75), bv: at(76)
+    btn: at(70), perch: at(71), pocketCard: at(72), sizeCard: at(73),
+    hanger: at(74), band: at(75), leather: at(76),
+
+    description: at(77), finisher: at(78), initialControl: at(79), controller: at(80),
+    saverName: at(81), editorName: at(82), bu: at(83), bv: at(84)
   };
 }
 
@@ -480,6 +484,9 @@ function saveOrderData(data) {
     data.size34_e3, data.size36_e3, data.size38_e3, data.size40_e3,
     data.size30_n, data.size31_n, data.size32_n, data.size33_n,
     data.size34_n, data.size36_n, data.size38_n, data.size40_n,
+
+    data.size30_stock, data.size31_stock, data.size32_stock, data.size33_stock,
+    data.size34_stock, data.size36_stock, data.size38_stock, data.size40_stock,
 
     data.stock_fabric, data.stock_wash, data.stock_production, data.stock_packaging,
     data.saleable_count, data.different_wash, data.waste, data.stock_minus, 
