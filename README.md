@@ -10,6 +10,8 @@
 - **[QUICK_START.md](./QUICK_START.md)** - شروع سریع در 15 دقیقه
 - **[STANDALONE_APP_PLAN.md](./STANDALONE_APP_PLAN.md)** - پلن کامل پروژه
 - **[CHAKRA_UI_SETUP.md](./CHAKRA_UI_SETUP.md)** - راهنمای کامل Chakra UI
+- **[RTL_JALALI_GUIDE.md](./RTL_JALALI_GUIDE.md)** - راهنمای RTL و تاریخ شمسی ⭐
+- **[RTL_COMPONENTS_EXAMPLES.md](./RTL_COMPONENTS_EXAMPLES.md)** - مثال‌های کامل کامپوننت‌ها
 
 ---
 
@@ -37,11 +39,13 @@
 
 ### Frontend
 - **Framework**: React 18 + Vite
-- **UI Library**: Chakra UI
+- **UI Library**: Chakra UI (RTL Support)
 - **State**: Zustand
 - **Forms**: React Hook Form + Zod
 - **HTTP**: Axios
 - **Routing**: React Router v6
+- **تاریخ شمسی**: jalaali-js + react-modern-calendar-datepicker
+- **فونت**: Vazirmatn (بهترین فونت فارسی)
 
 ### Backend
 - **Runtime**: Node.js 20

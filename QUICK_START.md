@@ -61,8 +61,8 @@ npm install react-router-dom
 # Icons
 npm install react-icons
 
-# Date utilities (Persian)
-npm install date-fns date-fns-jalali
+# تاریخ شمسی (جلالی) - مهم!
+npm install jalaali-js react-modern-calendar-datepicker
 
 # جمع کل زمان: ~2-3 دقیقه
 ```
@@ -120,7 +120,7 @@ const fonts = {
 
 const theme = extendTheme({
   config,
-  direction: 'rtl',
+  direction: 'rtl', // مهم: RTL برای فارسی
   colors,
   fonts,
 });
