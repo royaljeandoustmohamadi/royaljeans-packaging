@@ -364,9 +364,28 @@ router.get('/stone-washes', async (req, res) => {
 router.post('/stone-washes', async (req, res) => {
   try {
     const { name, value } = req.body;
+    const washName = name || value;
+
+    // Create stone wash in settings
     const item = await prisma.stoneWash.create({
-      data: { name: name || value, value: name || value }
+      data: { name: washName, value: washName }
     });
+
+    // Sync with contractors table
+    try {
+      await prisma.contractor.upsert({
+        where: { name: washName },
+        update: { isActive: true },
+        create: {
+          name: washName,
+          type: 'STONE_WASH',
+          isActive: true
+        }
+      });
+    } catch (syncError) {
+      console.warn('Failed to sync with contractors table:', syncError.message);
+    }
+
     res.json(item);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -376,10 +395,56 @@ router.post('/stone-washes', async (req, res) => {
 router.put('/stone-washes/:id', async (req, res) => {
   try {
     const { name, value } = req.body;
+    const washName = name || value;
+
+    // Get current stone wash
+    const currentWash = await prisma.stoneWash.findUnique({
+      where: { id: parseInt(req.params.id) }
+    });
+
+    if (!currentWash) {
+      return res.status(404).json({ error: 'Stone wash not found' });
+    }
+
+    // Update stone wash
     const item = await prisma.stoneWash.update({
       where: { id: parseInt(req.params.id) },
-      data: { name: name || value, value: name || value }
+      data: { name: washName, value: washName }
     });
+
+    // Sync with contractors table
+    try {
+      // Update existing contractor or create new one
+      await prisma.contractor.upsert({
+        where: { name: washName },
+        update: {
+          name: washName,
+          type: 'STONE_WASH',
+          isActive: true
+        },
+        create: {
+          name: washName,
+          type: 'STONE_WASH',
+          isActive: true
+        }
+      });
+
+      // If name changed, deactivate old contractor entry
+      if (currentWash.name !== washName) {
+        const oldContractor = await prisma.contractor.findUnique({
+          where: { name: currentWash.name }
+        });
+        if (oldContractor && oldContractor.type === 'STONE_WASH') {
+          await prisma.contractor.update({
+            where: { id: oldContractor.id },
+            data: { isActive: false }
+          });
+        }
+      }
+    } catch (syncError) {
+      console.warn('Failed to sync with contractors table:', syncError.message);
+    }
+
     res.json(item);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -388,10 +453,34 @@ router.put('/stone-washes/:id', async (req, res) => {
 
 router.delete('/stone-washes/:id', async (req, res) => {
   try {
+    // Get stone wash before deactivating
+    const wash = await prisma.stoneWash.findUnique({
+      where: { id: parseInt(req.params.id) }
+    });
+
+    // Deactivate stone wash
     await prisma.stoneWash.update({
       where: { id: parseInt(req.params.id) },
       data: { isActive: false }
     });
+
+    // Sync with contractors table
+    if (wash) {
+      try {
+        const contractor = await prisma.contractor.findUnique({
+          where: { name: wash.name }
+        });
+        if (contractor && contractor.type === 'STONE_WASH') {
+          await prisma.contractor.update({
+            where: { id: contractor.id },
+            data: { isActive: false }
+          });
+        }
+      } catch (syncError) {
+        console.warn('Failed to sync with contractors table:', syncError.message);
+      }
+    }
+
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -411,9 +500,28 @@ router.get('/packing-names', async (req, res) => {
 router.post('/packing-names', async (req, res) => {
   try {
     const { name, value } = req.body;
+    const packingName = name || value;
+
+    // Create packing name in settings
     const item = await prisma.packingName.create({
-      data: { name: name || value, value: name || value }
+      data: { name: packingName, value: packingName }
     });
+
+    // Sync with contractors table
+    try {
+      await prisma.contractor.upsert({
+        where: { name: packingName },
+        update: { isActive: true },
+        create: {
+          name: packingName,
+          type: 'PACKAGING',
+          isActive: true
+        }
+      });
+    } catch (syncError) {
+      console.warn('Failed to sync with contractors table:', syncError.message);
+    }
+
     res.json(item);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -423,10 +531,56 @@ router.post('/packing-names', async (req, res) => {
 router.put('/packing-names/:id', async (req, res) => {
   try {
     const { name, value } = req.body;
+    const packingName = name || value;
+
+    // Get current packing name
+    const currentPacking = await prisma.packingName.findUnique({
+      where: { id: parseInt(req.params.id) }
+    });
+
+    if (!currentPacking) {
+      return res.status(404).json({ error: 'Packing name not found' });
+    }
+
+    // Update packing name
     const item = await prisma.packingName.update({
       where: { id: parseInt(req.params.id) },
-      data: { name: name || value, value: name || value }
+      data: { name: packingName, value: packingName }
     });
+
+    // Sync with contractors table
+    try {
+      // Update existing contractor or create new one
+      await prisma.contractor.upsert({
+        where: { name: packingName },
+        update: {
+          name: packingName,
+          type: 'PACKAGING',
+          isActive: true
+        },
+        create: {
+          name: packingName,
+          type: 'PACKAGING',
+          isActive: true
+        }
+      });
+
+      // If name changed, deactivate old contractor entry
+      if (currentPacking.name !== packingName) {
+        const oldContractor = await prisma.contractor.findUnique({
+          where: { name: currentPacking.name }
+        });
+        if (oldContractor && oldContractor.type === 'PACKAGING') {
+          await prisma.contractor.update({
+            where: { id: oldContractor.id },
+            data: { isActive: false }
+          });
+        }
+      }
+    } catch (syncError) {
+      console.warn('Failed to sync with contractors table:', syncError.message);
+    }
+
     res.json(item);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -435,10 +589,34 @@ router.put('/packing-names/:id', async (req, res) => {
 
 router.delete('/packing-names/:id', async (req, res) => {
   try {
+    // Get packing name before deactivating
+    const packing = await prisma.packingName.findUnique({
+      where: { id: parseInt(req.params.id) }
+    });
+
+    // Deactivate packing name
     await prisma.packingName.update({
       where: { id: parseInt(req.params.id) },
       data: { isActive: false }
     });
+
+    // Sync with contractors table
+    if (packing) {
+      try {
+        const contractor = await prisma.contractor.findUnique({
+          where: { name: packing.name }
+        });
+        if (contractor && contractor.type === 'PACKAGING') {
+          await prisma.contractor.update({
+            where: { id: contractor.id },
+            data: { isActive: false }
+          });
+        }
+      } catch (syncError) {
+        console.warn('Failed to sync with contractors table:', syncError.message);
+      }
+    }
+
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
