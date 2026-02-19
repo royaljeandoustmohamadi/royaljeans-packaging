@@ -1,0 +1,96 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e24]:
+    - generic [ref=e26]:
+      - paragraph [ref=e28]: رویال جینز
+      - generic [ref=e29]:
+        - generic [ref=e30] [cursor=pointer]:
+          - img [ref=e31]
+          - paragraph [ref=e34]: داشبورد
+        - generic [ref=e35] [cursor=pointer]:
+          - img [ref=e36]
+          - paragraph [ref=e40]: سفارشات
+        - generic [ref=e41] [cursor=pointer]:
+          - img [ref=e42]
+          - paragraph [ref=e47]: پیمانکاران
+        - generic [ref=e48] [cursor=pointer]:
+          - img [ref=e49]
+          - paragraph [ref=e52]: گزارشات
+        - generic [ref=e53] [cursor=pointer]:
+          - img [ref=e54]
+          - paragraph [ref=e57]: مدیریت
+      - separator [ref=e58]
+      - generic [ref=e60]:
+        - img "مدیر سیستم" [ref=e62]: مس
+        - generic [ref=e63]:
+          - paragraph [ref=e64]: مدیر سیستم
+          - paragraph [ref=e65]: مدیر
+    - generic [ref=e66]:
+      - generic [ref=e67]:
+        - paragraph [ref=e68]: سیستم مدیریت سفارشات
+        - button "مدیر سیستم" [ref=e69] [cursor=pointer]:
+          - generic:
+            - generic:
+              - generic:
+                - img "مدیر سیستم": مس
+      - generic [ref=e71]:
+        - heading "داشبورد" [level=2] [ref=e72]
+        - generic [ref=e73]:
+          - generic [ref=e77]:
+            - term [ref=e78]:
+              - img [ref=e79]
+              - text: کل سفارشات
+            - definition [ref=e83]: "0"
+            - definition [ref=e84]: "کل تولید: 0 عدد"
+          - generic [ref=e88]:
+            - term [ref=e89]:
+              - img [ref=e90]
+              - text: در انتظار
+            - definition [ref=e93]: "0"
+            - definition [ref=e94]: سفارشات در انتظار پردازش
+          - generic [ref=e98]:
+            - term [ref=e99]:
+              - img [ref=e100]
+              - text: در حال پردازش
+            - definition [ref=e102]: "0"
+            - definition [ref=e103]: سفارشات در حال انجام
+          - generic [ref=e107]:
+            - term [ref=e108]:
+              - img [ref=e109]
+              - text: تکمیل شده
+            - definition [ref=e112]: "0"
+            - definition [ref=e113]: "نرخ موفقیت: 0%"
+        - generic [ref=e114]:
+          - generic [ref=e118]:
+            - term [ref=e119]:
+              - img [ref=e120]
+              - text: کل پیمانکاران
+            - definition [ref=e125]: "4"
+            - definition [ref=e126]: تعداد کل پیمانکاران
+          - generic [ref=e130]:
+            - term [ref=e131]:
+              - img [ref=e132]
+              - text: پیمانکاران فعال
+            - definition [ref=e135]: "4"
+            - definition [ref=e136]: پیمانکاران در حال همکاری
+          - generic [ref=e140]:
+            - term [ref=e141]:
+              - img [ref=e142]
+              - text: نرخ تکمیل
+            - definition [ref=e145]: 0%
+            - definition [ref=e146]: درصد سفارشات تکمیل شده
+          - generic [ref=e150]:
+            - term [ref=e151]:
+              - img [ref=e152]
+              - text: میانگین تولید
+            - definition [ref=e156]: "0"
+            - definition [ref=e157]: میانگین تعداد هر سفارش
+        - generic [ref=e159]:
+          - heading "خوش آمدید" [level=2] [ref=e160]
+          - paragraph [ref=e161]: به سیستم مدیریت سفارشات رویال جینز خوش آمدید. از منوی سمت راست می‌توانید به بخش‌های مختلف سیستم دسترسی داشته باشید.
+  - generic:
+    - region "Notifications-top"
+    - region "Notifications-top-left"
+    - region "Notifications-top-right"
+    - region "Notifications-bottom-left"
+    - region "Notifications-bottom"
+    - region "Notifications-bottom-right"
