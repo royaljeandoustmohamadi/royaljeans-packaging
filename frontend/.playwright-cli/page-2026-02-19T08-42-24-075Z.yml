@@ -1,0 +1,25 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e7]:
+    - heading "سیستم مدیریت رویال جینز" [level=2] [ref=e8]
+    - paragraph [ref=e9]: لطفاً برای ادامه وارد شوید
+    - group [ref=e10]:
+      - generic [ref=e11]: ایمیل*
+      - textbox "ایمیل" [ref=e12]:
+        - /placeholder: example@email.com
+        - text: admin@royaljeans.com
+    - group [ref=e13]:
+      - generic [ref=e14]: رمز عبور*
+      - generic [ref=e15]:
+        - textbox "رمز عبور" [ref=e16]:
+          - /placeholder: "********"
+          - text: password123
+        - button "نمایش رمز" [ref=e18] [cursor=pointer]:
+          - img [ref=e19]
+    - button "ورود" [ref=e23] [cursor=pointer]
+  - generic:
+    - region "Notifications-top"
+    - region "Notifications-top-left"
+    - region "Notifications-top-right"
+    - region "Notifications-bottom-left"
+    - region "Notifications-bottom"
+    - region "Notifications-bottom-right"
