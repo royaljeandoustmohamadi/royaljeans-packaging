@@ -45,9 +45,28 @@ router.get('/production-suppliers', async (req, res) => {
 router.post('/production-suppliers', async (req, res) => {
   try {
     const { name, value } = req.body;
+    const supplierName = name || value;
+
+    // Create production supplier in settings
     const item = await prisma.productionSupplier.create({
-      data: { name: name || value, value: name || value }
+      data: { name: supplierName, value: supplierName }
     });
+
+    // Sync with contractors table
+    try {
+      await prisma.contractor.upsert({
+        where: { name: supplierName },
+        update: { isActive: true },
+        create: {
+          name: supplierName,
+          type: 'PRODUCTION',
+          isActive: true
+        }
+      });
+    } catch (syncError) {
+      console.warn('Failed to sync with contractors table:', syncError.message);
+    }
+
     res.json(item);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -57,10 +76,56 @@ router.post('/production-suppliers', async (req, res) => {
 router.put('/production-suppliers/:id', async (req, res) => {
   try {
     const { name, value } = req.body;
+    const supplierName = name || value;
+
+    // Get current production supplier
+    const currentSupplier = await prisma.productionSupplier.findUnique({
+      where: { id: parseInt(req.params.id) }
+    });
+
+    if (!currentSupplier) {
+      return res.status(404).json({ error: 'Production supplier not found' });
+    }
+
+    // Update production supplier
     const item = await prisma.productionSupplier.update({
       where: { id: parseInt(req.params.id) },
-      data: { name: name || value, value: name || value }
+      data: { name: supplierName, value: supplierName }
     });
+
+    // Sync with contractors table
+    try {
+      // Update existing contractor or create new one
+      await prisma.contractor.upsert({
+        where: { name: supplierName },
+        update: {
+          name: supplierName,
+          type: 'PRODUCTION',
+          isActive: true
+        },
+        create: {
+          name: supplierName,
+          type: 'PRODUCTION',
+          isActive: true
+        }
+      });
+
+      // If name changed, deactivate old contractor entry
+      if (currentSupplier.name !== supplierName) {
+        const oldContractor = await prisma.contractor.findUnique({
+          where: { name: currentSupplier.name }
+        });
+        if (oldContractor && oldContractor.type === 'PRODUCTION') {
+          await prisma.contractor.update({
+            where: { id: oldContractor.id },
+            data: { isActive: false }
+          });
+        }
+      }
+    } catch (syncError) {
+      console.warn('Failed to sync with contractors table:', syncError.message);
+    }
+
     res.json(item);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -69,10 +134,34 @@ router.put('/production-suppliers/:id', async (req, res) => {
 
 router.delete('/production-suppliers/:id', async (req, res) => {
   try {
+    // Get production supplier before deactivating
+    const supplier = await prisma.productionSupplier.findUnique({
+      where: { id: parseInt(req.params.id) }
+    });
+
+    // Deactivate production supplier
     await prisma.productionSupplier.update({
       where: { id: parseInt(req.params.id) },
       data: { isActive: false }
     });
+
+    // Sync with contractors table
+    if (supplier) {
+      try {
+        const contractor = await prisma.contractor.findUnique({
+          where: { name: supplier.name }
+        });
+        if (contractor && contractor.type === 'PRODUCTION') {
+          await prisma.contractor.update({
+            where: { id: contractor.id },
+            data: { isActive: false }
+          });
+        }
+      } catch (syncError) {
+        console.warn('Failed to sync with contractors table:', syncError.message);
+      }
+    }
+
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -92,9 +181,28 @@ router.get('/fabric-suppliers', async (req, res) => {
 router.post('/fabric-suppliers', async (req, res) => {
   try {
     const { name, value } = req.body;
+    const supplierName = name || value;
+
+    // Create fabric supplier in settings
     const item = await prisma.fabricSupplier.create({
-      data: { name: name || value, value: name || value }
+      data: { name: supplierName, value: supplierName }
     });
+
+    // Sync with contractors table
+    try {
+      await prisma.contractor.upsert({
+        where: { name: supplierName },
+        update: { isActive: true },
+        create: {
+          name: supplierName,
+          type: 'FABRIC',
+          isActive: true
+        }
+      });
+    } catch (syncError) {
+      console.warn('Failed to sync with contractors table:', syncError.message);
+    }
+
     res.json(item);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -104,10 +212,56 @@ router.post('/fabric-suppliers', async (req, res) => {
 router.put('/fabric-suppliers/:id', async (req, res) => {
   try {
     const { name, value } = req.body;
+    const supplierName = name || value;
+
+    // Get current fabric supplier
+    const currentSupplier = await prisma.fabricSupplier.findUnique({
+      where: { id: parseInt(req.params.id) }
+    });
+
+    if (!currentSupplier) {
+      return res.status(404).json({ error: 'Fabric supplier not found' });
+    }
+
+    // Update fabric supplier
     const item = await prisma.fabricSupplier.update({
       where: { id: parseInt(req.params.id) },
-      data: { name: name || value, value: name || value }
+      data: { name: supplierName, value: supplierName }
     });
+
+    // Sync with contractors table
+    try {
+      // Update existing contractor or create new one
+      await prisma.contractor.upsert({
+        where: { name: supplierName },
+        update: {
+          name: supplierName,
+          type: 'FABRIC',
+          isActive: true
+        },
+        create: {
+          name: supplierName,
+          type: 'FABRIC',
+          isActive: true
+        }
+      });
+
+      // If name changed, deactivate old contractor entry
+      if (currentSupplier.name !== supplierName) {
+        const oldContractor = await prisma.contractor.findUnique({
+          where: { name: currentSupplier.name }
+        });
+        if (oldContractor && oldContractor.type === 'FABRIC') {
+          await prisma.contractor.update({
+            where: { id: oldContractor.id },
+            data: { isActive: false }
+          });
+        }
+      }
+    } catch (syncError) {
+      console.warn('Failed to sync with contractors table:', syncError.message);
+    }
+
     res.json(item);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -116,10 +270,34 @@ router.put('/fabric-suppliers/:id', async (req, res) => {
 
 router.delete('/fabric-suppliers/:id', async (req, res) => {
   try {
+    // Get fabric supplier before deactivating
+    const supplier = await prisma.fabricSupplier.findUnique({
+      where: { id: parseInt(req.params.id) }
+    });
+
+    // Deactivate fabric supplier
     await prisma.fabricSupplier.update({
       where: { id: parseInt(req.params.id) },
       data: { isActive: false }
     });
+
+    // Sync with contractors table
+    if (supplier) {
+      try {
+        const contractor = await prisma.contractor.findUnique({
+          where: { name: supplier.name }
+        });
+        if (contractor && contractor.type === 'FABRIC') {
+          await prisma.contractor.update({
+            where: { id: contractor.id },
+            data: { isActive: false }
+          });
+        }
+      } catch (syncError) {
+        console.warn('Failed to sync with contractors table:', syncError.message);
+      }
+    }
+
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
