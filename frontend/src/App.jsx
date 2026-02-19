@@ -11,7 +11,11 @@ import Login from './pages/auth/Login';
 import Dashboard from './pages/dashboard/Dashboard';
 import OrdersList from './pages/orders/OrdersList';
 import OrderCreate from './pages/orders/OrderCreate';
+import OrderDetails from './pages/orders/OrderDetails';
+import OrderEdit from './pages/orders/OrderEdit';
 import ContractorsList from './pages/contractors/ContractorsList';
+import ContractorCreate from './pages/contractors/ContractorCreate';
+import Reports from './pages/reports/Reports';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -53,11 +57,11 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="orders" element={<OrdersList />} />
           <Route path="orders/new" element={<OrderCreate />} />
-          <Route path="orders/:id" element={<Box>جزئیات سفارش (به زودی)</Box>} />
-          <Route path="orders/:id/edit" element={<Box>ویرایش سفارش (به زودی)</Box>} />
+          <Route path="orders/:id" element={<OrderDetails />} />
+          <Route path="orders/:id/edit" element={<OrderEdit />} />
           <Route path="contractors" element={<ContractorsList />} />
-          <Route path="contractors/new" element={<Box>ثبت پیمانکار جدید (به زودی)</Box>} />
-          <Route path="reports" element={<Box>گزارشات (به زودی)</Box>} />
+          <Route path="contractors/new" element={<ContractorCreate />} />
+          <Route path="reports" element={<Reports />} />
           <Route path="admin" element={<Box>پنل مدیریت (به زودی)</Box>} />
         </Route>
 

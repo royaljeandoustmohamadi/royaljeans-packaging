@@ -19,9 +19,13 @@ import {
   Package, 
   Users, 
   TrendingUp, 
-  ClipboardList 
+  ClipboardList,
+  CheckCircle,
+  Clock,
+  AlertCircle,
 } from 'lucide-react';
 import ordersService from '../../services/orders.service';
+import contractorsService from '../../services/contractors.service';
 
 const StatCard = ({ title, value, helpText, icon, color }) => (
   <Card>
@@ -48,8 +52,12 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     totalOrders: 0,
     pendingOrders: 0,
+    processingOrders: 0,
     completedOrders: 0,
     totalContractors: 0,
+    activeContractors: 0,
+    totalQuantity: 0,
+    completionRate: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,17 +69,35 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const ordersData = await ordersService.getAll({ limit: 1000 });
-      const orders = ordersData.orders || [];
       
+      // Fetch orders and contractors data
+      const [ordersResponse, contractorsResponse] = await Promise.all([
+        ordersService.getAll({ limit: 1000 }),
+        contractorsService.getAll(),
+      ]);
+      
+      const orders = ordersResponse.orders || [];
+      const contractors = contractorsResponse.contractors || [];
+      
+      // Calculate order statistics
       const pending = orders.filter(o => o.status === 'pending').length;
+      const processing = orders.filter(o => o.status === 'processing').length;
       const completed = orders.filter(o => o.status === 'completed').length;
+      const totalQuantity = orders.reduce((sum, order) => sum + (order.totalCount || 0), 0);
+      const completionRate = orders.length > 0 ? Math.round((completed / orders.length) * 100) : 0;
+      
+      // Calculate contractor statistics
+      const activeContractors = contractors.filter(c => c.isActive).length;
       
       setStats({
         totalOrders: orders.length,
         pendingOrders: pending,
+        processingOrders: processing,
         completedOrders: completed,
-        totalContractors: 0, // Will be fetched from contractors API
+        totalContractors: contractors.length,
+        activeContractors: activeContractors,
+        totalQuantity: totalQuantity,
+        completionRate: completionRate,
       });
     } catch (err) {
       setError('خطا در دریافت آمار');
@@ -107,30 +133,61 @@ const Dashboard = () => {
         <StatCard
           title="کل سفارشات"
           value={stats.totalOrders}
-          helpText="تمام سفارشات ثبت شده"
+          helpText={`کل تولید: ${stats.totalQuantity.toLocaleString()} عدد`}
           icon={Package}
           color="blue.500"
         />
         <StatCard
-          title="سفارشات در انتظار"
+          title="در انتظار"
           value={stats.pendingOrders}
-          helpText="سفارشات در حال بررسی"
-          icon={ClipboardList}
+          helpText="سفارشات در انتظار پردازش"
+          icon={Clock}
           color="orange.500"
         />
         <StatCard
-          title="سفارشات تکمیل شده"
-          value={stats.completedOrders}
-          helpText="سفارشات به اتمام رسیده"
-          icon={TrendingUp}
-          color="green.500"
+          title="در حال پردازش"
+          value={stats.processingOrders}
+          helpText="سفارشات در حال انجام"
+          icon={AlertCircle}
+          color="yellow.500"
         />
         <StatCard
-          title="پیمانکاران"
+          title="تکمیل شده"
+          value={stats.completedOrders}
+          helpText={`نرخ موفقیت: ${stats.completionRate}%`}
+          icon={CheckCircle}
+          color="green.500"
+        />
+      </SimpleGrid>
+
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={8}>
+        <StatCard
+          title="کل پیمانکاران"
           value={stats.totalContractors}
-          helpText="تعداد پیمانکاران فعال"
+          helpText="تعداد کل پیمانکاران"
           icon={Users}
           color="purple.500"
+        />
+        <StatCard
+          title="پیمانکاران فعال"
+          value={stats.activeContractors}
+          helpText="پیمانکاران در حال همکاری"
+          icon={TrendingUp}
+          color="green.600"
+        />
+        <StatCard
+          title="نرخ تکمیل"
+          value={`${stats.completionRate}%`}
+          helpText="درصد سفارشات تکمیل شده"
+          icon={CheckCircle}
+          color="blue.500"
+        />
+        <StatCard
+          title="میانگین تولید"
+          value={stats.totalOrders > 0 ? Math.round(stats.totalQuantity / stats.totalOrders) : 0}
+          helpText="میانگین تعداد هر سفارش"
+          icon={Package}
+          color="cyan.500"
         />
       </SimpleGrid>
 
