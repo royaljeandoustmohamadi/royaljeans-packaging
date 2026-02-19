@@ -16,6 +16,7 @@ import OrderEdit from './pages/orders/OrderEdit';
 import ContractorsList from './pages/contractors/ContractorsList';
 import ContractorCreate from './pages/contractors/ContractorCreate';
 import Reports from './pages/reports/Reports';
+import AdminPanel from './pages/admin/AdminPanel';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -62,7 +63,7 @@ function App() {
           <Route path="contractors" element={<ContractorsList />} />
           <Route path="contractors/new" element={<ContractorCreate />} />
           <Route path="reports" element={<Reports />} />
-          <Route path="admin" element={<Box>پنل مدیریت (به زودی)</Box>} />
+          <Route path="admin" element={<AdminPanel />} />
         </Route>
 
         {/* Fallback */}
