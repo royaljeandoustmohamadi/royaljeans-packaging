@@ -317,7 +317,7 @@ const OrderCreate = () => {
             <VStack spacing={6} align="stretch">
               <Card>
                 <CardBody>
-                  <Heading size="sm" mb={4">اقتصادی 1</Heading>
+                  <Heading size="sm" mb={4}>اقتصادی 1</Heading>
                   <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
                     <SizeInput label="سایز 30" field="size30_economy" />
                     <SizeInput label="سایز 31" field="size31_economy" />
@@ -333,7 +333,7 @@ const OrderCreate = () => {
 
               <Card>
                 <CardBody>
-                  <Heading size="sm" mb={4">اقتصادی 2</Heading>
+                  <Heading size="sm" mb={4}>اقتصادی 2</Heading>
                   <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
                     <SizeInput label="سایز 30" field="size30_economy2" />
                     <SizeInput label="سایز 31" field="size31_economy2" />
@@ -349,7 +349,7 @@ const OrderCreate = () => {
 
               <Card>
                 <CardBody>
-                  <Heading size="sm" mb={4">اقتصادی 3</Heading>
+                  <Heading size="sm" mb={4}>اقتصادی 3</Heading>
                   <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
                     <SizeInput label="سایز 30" field="size30_economy3" />
                     <SizeInput label="سایز 31" field="size31_economy3" />
@@ -370,7 +370,7 @@ const OrderCreate = () => {
             <VStack spacing={6} align="stretch">
               <Card>
                 <CardBody>
-                  <Heading size="sm" mb={4">سایزبندی نمونه</Heading>
+                  <Heading size="sm" mb={4}>سایزبندی نمونه</Heading>
                   <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
                     <SizeInput label="سایز 30" field="size30_sample" />
                     <SizeInput label="سایز 31" field="size31_sample" />
@@ -386,7 +386,7 @@ const OrderCreate = () => {
 
               <Card>
                 <CardBody>
-                  <Heading size="sm" mb={4">سایزبندی استوک</Heading>
+                  <Heading size="sm" mb={4}>سایزبندی استوک</Heading>
                   <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
                     <SizeInput label="سایز 30" field="size30_stock" />
                     <SizeInput label="سایز 31" field="size31_stock" />
@@ -407,7 +407,7 @@ const OrderCreate = () => {
             <VStack spacing={6} align="stretch">
               <Card>
                 <CardBody>
-                  <Heading size="sm" mb={4">موجودی</Heading>
+                  <Heading size="sm" mb={4}>موجودی</Heading>
                   <SimpleGrid columns={{ base: 2, md: 3 }} spacing={4}>
                     <SizeInput label="موجودی پارچه" field="stockFabric" />
                     <SizeInput label="موجودی شستشو" field="stockWash" />
@@ -425,7 +425,7 @@ const OrderCreate = () => {
 
               <Card>
                 <CardBody>
-                  <Heading size="sm" mb={4">ملزومات</Heading>
+                  <Heading size="sm" mb={4}>ملزومات</Heading>
                   <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
                     <SizeInput label="دکمه" field="accessories_button" />
                     <SizeInput label="میخ" field="accessories_rivet" />

@@ -360,7 +360,7 @@ const OrderDetails = () => {
                 <Text color="gray.600">{order.accessories_sizeCard || 0}</Text>
               </Box>
               <Box>
-                <Text fontWeight="bold" mb={1">آویز:</Text>
+                <Text fontWeight="bold" mb={1}>آویز:</Text>
                 <Text color="gray.600">{order.accessories_hanger || 0}</Text>
               </Box>
               <Box>
