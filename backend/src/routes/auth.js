@@ -9,11 +9,11 @@ const router = express.Router();
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, fullName, role = 'USER' } = req.body;
+    const { email, password, displayName, nickname, role = 'USER' } = req.body;
 
     // Validation
-    if (!email || !password || !fullName) {
-      return res.status(400).json({ message: 'همه فیلدها اجباری هستند' });
+    if (!email || !password || !displayName) {
+      return res.status(400).json({ message: 'همه فیلدهای اجباری را پر کنید' });
     }
 
     if (password.length < 6) {
@@ -37,13 +37,15 @@ router.post('/register', async (req, res) => {
       data: {
         email,
         password: hashedPassword,
-        fullName,
+        displayName,
+        nickname: nickname || displayName, // Default nickname to displayName if not provided
         role
       },
       select: {
         id: true,
         email: true,
-        fullName: true,
+        displayName: true,
+        nickname: true,
         role: true,
         createdAt: true
       }
@@ -113,7 +115,11 @@ router.get('/profile', authenticateToken, async (req, res) => {
       select: {
         id: true,
         email: true,
-        fullName: true,
+        displayName: true,
+        nickname: true,
+        avatar: true,
+        phone: true,
+        bio: true,
         role: true,
         isActive: true,
         createdAt: true

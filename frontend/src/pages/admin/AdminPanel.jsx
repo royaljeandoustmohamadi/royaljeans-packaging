@@ -32,6 +32,12 @@ import {
   Tooltip,
   Alert,
   AlertIcon,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  TabIndicator,
 } from '@chakra-ui/react';
 import { 
   Save, 
@@ -51,8 +57,12 @@ import {
   RefreshCw,
   Check,
   X,
+  Users,
+  UserCog,
 } from 'lucide-react';
 import settingsService from '../../services/settings.service';
+import UserManagement from './UserManagement';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const SettingCard = ({ title, icon: Icon, items, onAdd, onEdit, onDelete, colorScheme = 'blue' }) => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -265,6 +275,18 @@ const AdminPanel = () => {
     orderLevels: [],
   });
   const toast = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check if we're on the users page
+  const isUsersPage = location.pathname === '/admin/users';
+
+  // Redirect to users page if navigating directly
+  useEffect(() => {
+    if (isUsersPage) {
+      // User management is handled by a separate route
+    }
+  }, [isUsersPage]);
 
   const fetchSettings = async () => {
     try {
@@ -404,6 +426,60 @@ const AdminPanel = () => {
 
   return (
     <Box>
+      {/* Tab Navigation */}
+      <Tabs variant="unstyled" mb={6}>
+        <TabList
+          bg="white"
+          borderRadius="lg"
+          p={1}
+          boxShadow="sm"
+          border="1px"
+          borderColor="gray.200"
+        >
+          <Tab
+            borderRadius="md"
+            px={6}
+            py={3}
+            fontWeight="medium"
+            color="gray.600"
+            _selected={{
+              bg: 'brand.500',
+              color: 'white',
+              shadow: 'md',
+            }}
+            onClick={() => navigate('/admin')}
+          >
+            <HStack spacing={2}>
+              <Settings size={18} />
+              <Text>تنظیمات سیستم</Text>
+            </HStack>
+          </Tab>
+          <Tab
+            borderRadius="md"
+            px={6}
+            py={3}
+            fontWeight="medium"
+            color="gray.600"
+            _selected={{
+              bg: 'brand.500',
+              color: 'white',
+              shadow: 'md',
+            }}
+            onClick={() => navigate('/admin/users')}
+          >
+            <HStack spacing={2}>
+              <Users size={18} />
+              <Text>مدیریت کاربران</Text>
+            </HStack>
+          </Tab>
+        </TabList>
+        <TabIndicator mt="-1.5px" height="2px" bg="brand.500" borderRadius="full" />
+      </Tabs>
+
+      {location.pathname === '/admin/users' ? (
+        <UserManagement />
+      ) : (
+        <>
       <Flex justify="space-between" align="center" mb={6}>
         <Box>
           <Heading size="lg" color="gray.700">
@@ -504,6 +580,8 @@ const AdminPanel = () => {
           onDelete={(id) => handleDelete('fabricSuppliers', id)}
         />
       </SimpleGrid>
+        </>
+      )}
     </Box>
   );
 };

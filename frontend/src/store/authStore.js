@@ -34,7 +34,10 @@ const useAuthStore = create((set, get) => ({
   clearError: () => set({ error: null }),
 
   updateUser: (userData) => {
-    set({ user: { ...get().user, ...userData } });
+    // Update both local state and localStorage
+    const updatedUser = { ...get().user, ...userData };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    set({ user: updatedUser });
   },
 }));
 
