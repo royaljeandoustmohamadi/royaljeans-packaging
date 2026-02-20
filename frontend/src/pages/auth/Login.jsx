@@ -1,124 +1,272 @@
 import { useState } from 'react';
-import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  VStack,
-  Heading,
-  Text,
-  useToast,
-  Container,
-  Card,
-  CardBody,
-  InputGroup,
-  InputRightElement,
-  IconButton,
-} from '@chakra-ui/react';
-import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [localError, setLocalError] = useState('');
   const { login, isLoading, error } = useAuthStore();
-  const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setLocalError('');
+
     if (!email || !password) {
-      toast({
-        title: 'خطا',
-        description: 'لطفاً ایمیل و رمز عبور را وارد کنید',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+      setLocalError('لطفاً ایمیل و رمز عبور را وارد کنید');
       return;
     }
 
     try {
       await login(email, password);
-      toast({
-        title: 'ورود موفقیت‌آمیز',
-        description: 'به سیستم مدیریت رویال جینز خوش آمدید',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (err) {
-      toast({
-        title: 'خطا در ورود',
-        description: error || 'ایمیل یا رمز عبور اشتباه است',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+    } catch (_err) {
+      setLocalError(error || 'ایمیل یا رمز عبور اشتباه است');
     }
   };
 
-  return (
-    <Container maxW="md" py={12}>
-      <Card boxShadow="lg">
-        <CardBody p={8}>
-          <VStack spacing={6} as="form" onSubmit={handleSubmit}>
-            <Heading size="lg" color="brand.600">
-              سیستم مدیریت رویال جینز
-            </Heading>
-            <Text color="gray.500" fontSize="sm">
-              لطفاً برای ادامه وارد شوید
-            </Text>
+  const inputStyle = {
+    width: '100%',
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid var(--border)',
+    borderRadius: 10,
+    padding: '11px 40px 11px 14px',
+    color: 'var(--text-primary)',
+    fontFamily: 'var(--font)',
+    fontSize: 14,
+    outline: 'none',
+    transition: 'var(--transition)',
+  };
 
-            <FormControl isRequired>
-              <FormLabel>ایمیل</FormLabel>
-              <Input
+  return (
+    <div
+      style={{
+        width: '100%',
+        maxWidth: 420,
+        margin: '0 auto',
+        padding: '0 20px',
+      }}
+    >
+      <div
+        style={{
+          background: 'var(--bg-card)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius)',
+          padding: '40px 36px',
+          boxShadow: 'var(--shadow-lg)',
+        }}
+      >
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <div
+            style={{
+              width: 60,
+              height: 60,
+              borderRadius: 18,
+              background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 22,
+              fontWeight: 900,
+              color: 'white',
+              margin: '0 auto 16px',
+              boxShadow: '0 8px 25px rgba(245,158,11,0.4)',
+            }}
+          >
+            RJ
+          </div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>
+            Royal Jeans
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+            سیستم مدیریت تولید
+          </div>
+        </div>
+
+        {/* Error */}
+        {(localError || error) && (
+          <div
+            style={{
+              background: 'rgba(239,68,68,0.1)',
+              border: '1px solid rgba(239,68,68,0.3)',
+              borderRadius: 10,
+              padding: '10px 14px',
+              fontSize: 13,
+              color: '#f87171',
+              marginBottom: 20,
+              textAlign: 'center',
+            }}
+          >
+            {localError || error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          {/* Email */}
+          <div style={{ marginBottom: 16 }}>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 12,
+                color: 'var(--text-secondary)',
+                marginBottom: 6,
+                fontWeight: 500,
+              }}
+            >
+              ایمیل
+            </label>
+            <div style={{ position: 'relative' }}>
+              <Mail
+                size={16}
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--text-muted)',
+                  pointerEvents: 'none',
+                }}
+              />
+              <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="example@email.com"
-                focusBorderColor="brand.500"
+                style={{ ...inputStyle, direction: 'ltr', textAlign: 'left' }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'var(--accent-gold)';
+                  e.target.style.background = 'rgba(245,158,11,0.05)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'var(--border)';
+                  e.target.style.background = 'rgba(255,255,255,0.05)';
+                }}
               />
-            </FormControl>
+            </div>
+          </div>
 
-            <FormControl isRequired>
-              <FormLabel>رمز عبور</FormLabel>
-              <InputGroup>
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="********"
-                  focusBorderColor="brand.500"
-                />
-                <InputRightElement>
-                  <IconButton
-                    variant="ghost"
-                    size="sm"
-                    icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'مخفی کردن رمز' : 'نمایش رمز'}
-                  />
-                </InputRightElement>
-              </InputGroup>
-            </FormControl>
-
-            <Button
-              type="submit"
-              colorScheme="brand"
-              width="full"
-              size="lg"
-              isLoading={isLoading}
-              loadingText="در حال ورود..."
+          {/* Password */}
+          <div style={{ marginBottom: 24 }}>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 12,
+                color: 'var(--text-secondary)',
+                marginBottom: 6,
+                fontWeight: 500,
+              }}
             >
-              ورود
-            </Button>
-          </VStack>
-        </CardBody>
-      </Card>
-    </Container>
+              رمز عبور
+            </label>
+            <div style={{ position: 'relative' }}>
+              <Lock
+                size={16}
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--text-muted)',
+                  pointerEvents: 'none',
+                }}
+              />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="رمز عبور خود را وارد کنید"
+                style={inputStyle}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'var(--accent-gold)';
+                  e.target.style.background = 'rgba(245,158,11,0.05)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'var(--border)';
+                  e.target.style.background = 'rgba(255,255,255,0.05)';
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  left: 12,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: 10,
+              border: 'none',
+              background: isLoading
+                ? 'rgba(245,158,11,0.5)'
+                : 'linear-gradient(135deg, #f59e0b, #ef4444)',
+              color: 'white',
+              fontFamily: 'var(--font)',
+              fontSize: 15,
+              fontWeight: 700,
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              boxShadow: isLoading ? 'none' : '0 4px 15px rgba(245,158,11,0.35)',
+              transition: 'var(--transition)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+            }}
+          >
+            {isLoading ? (
+              <>
+                <div
+                  style={{
+                    width: 18,
+                    height: 18,
+                    border: '2px solid rgba(255,255,255,0.3)',
+                    borderTopColor: 'white',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite',
+                  }}
+                />
+                در حال ورود...
+              </>
+            ) : (
+              'ورود به سیستم'
+            )}
+          </button>
+        </form>
+
+        <div
+          style={{
+            textAlign: 'center',
+            marginTop: 24,
+            fontSize: 12,
+            color: 'var(--text-muted)',
+          }}
+        >
+          v1.0.1 — Royal Jeans Manufacturing System
+        </div>
+      </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
   );
 };
 

@@ -1,66 +1,73 @@
-import { useState, useRef } from 'react';
-import {
-  Box,
-  VStack,
-  HStack,
-  Heading,
-  Text,
-  FormControl,
-  FormLabel,
-  Input,
-  Textarea,
-  Button,
-  Avatar,
-  AvatarBadge,
-  IconButton,
-  useToast,
-  Divider,
-  SimpleGrid,
-  Card,
-  CardBody,
-  Badge,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  FormHelperText,
-  InputGroup,
-  InputLeftElement,
-  useColorModeValue,
-  Switch,
-  Select,
-  Grid,
-  GridItem,
-} from '@chakra-ui/react';
-import {
-  Camera,
-  Mail,
-  Phone,
-  Calendar,
-  Shield,
-  Save,
-  Lock,
-  User,
-  Edit3,
-} from 'lucide-react';
+import { useState } from 'react';
+import { User, Mail, Phone, Shield, Lock, Save, Edit3 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import userService from '../../services/user.service';
 
+const inputStyle = {
+  width: '100%',
+  background: 'rgba(255,255,255,0.05)',
+  border: '1px solid var(--border)',
+  borderRadius: 10,
+  padding: '10px 36px 10px 14px',
+  color: 'var(--text-primary)',
+  fontFamily: 'var(--font)',
+  fontSize: 13,
+  outline: 'none',
+  transition: 'var(--transition)',
+};
+
+const readOnlyInputStyle = {
+  ...inputStyle,
+  background: 'rgba(255,255,255,0.02)',
+  cursor: 'not-allowed',
+  color: 'var(--text-muted)',
+};
+
+const roleLabels = {
+  ADMIN: 'مدیر سیستم',
+  MANAGER: 'مدیر تولید',
+  PRODUCTION: 'مسئول تولید',
+  WAREHOUSE: 'انباردار',
+  SALES: 'کارشناس فروش',
+  ACCOUNTANT: 'حسابدار',
+};
+
+const roleColors = {
+  ADMIN: { bg: 'rgba(239,68,68,0.15)', color: '#f87171' },
+  MANAGER: { bg: 'rgba(139,92,246,0.15)', color: '#a78bfa' },
+  PRODUCTION: { bg: 'rgba(16,185,129,0.15)', color: '#34d399' },
+  WAREHOUSE: { bg: 'rgba(59,130,246,0.15)', color: '#60a5fa' },
+  SALES: { bg: 'rgba(245,158,11,0.15)', color: '#fbbf24' },
+  ACCOUNTANT: { bg: 'rgba(249,115,22,0.15)', color: '#fb923c' },
+};
+
+const Card = ({ children, style }) => (
+  <div
+    style={{
+      background: 'var(--bg-card)',
+      backdropFilter: 'blur(20px)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius)',
+      overflow: 'hidden',
+      ...style,
+    }}
+  >
+    {children}
+  </div>
+);
+
 const ProfilePage = () => {
   const { user, updateUser } = useAuthStore();
-  const toast = useToast();
-  const fileInputRef = useRef(null);
-
+  const [activeTab, setActiveTab] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
-  // Form states
   const [profileData, setProfileData] = useState({
     nickname: user?.nickname || '',
     phone: user?.phone || '',
     bio: user?.bio || '',
-    avatar: user?.avatar || '',
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -69,483 +76,383 @@ const ProfilePage = () => {
     confirmPassword: '',
   });
 
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const userInitial =
+    user?.firstName?.[0] || user?.displayName?.[0] || user?.email?.[0]?.toUpperCase() || 'U';
+  const roleColor = roleColors[user?.role] || roleColors['PRODUCTION'];
 
-  const handleProfileChange = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({ ...prev, [name]: value }));
+  const showMsg = (msg, isError = false) => {
+    if (isError) setErrorMsg(msg);
+    else setSuccessMsg(msg);
+    setTimeout(() => {
+      setSuccessMsg('');
+      setErrorMsg('');
+    }, 3000);
   };
 
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleAvatarChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Create a local URL for preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const avatarUrl = reader.result;
-        setProfileData((prev) => ({ ...prev, avatar: avatarUrl }));
-        handleProfileUpdate({ avatar: avatarUrl });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleProfileUpdate = async (data) => {
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await userService.updateProfile(user.id, data);
+      const response = await userService.updateProfile(user.id, profileData);
       updateUser(response.user);
-      toast({
-        title: 'موفق',
-        description: 'پروفایل با موفقیت به‌روزرسانی شد',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-        position: 'top-left',
-      });
-    } catch (error) {
-      toast({
-        title: 'خطا',
-        description: error.response?.data?.message || 'خطا در به‌روزرسانی پروفایل',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-        position: 'top-left',
-      });
+      showMsg('پروفایل با موفقیت به‌روزرسانی شد');
+    } catch (err) {
+      showMsg(err.response?.data?.message || 'خطا در به‌روزرسانی پروفایل', true);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleProfileSubmit = (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    handleProfileUpdate(profileData);
-  };
-
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
-
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({
-        title: 'خطا',
-        description: 'رمزهای عبور جدید مطابقت ندارند',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-        position: 'top-left',
-      });
+      showMsg('رمزهای عبور جدید مطابقت ندارند', true);
       return;
     }
-
     if (passwordData.newPassword.length < 6) {
-      toast({
-        title: 'خطا',
-        description: 'رمز عبور جدید باید حداقل 6 کاراکتر باشد',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-        position: 'top-left',
-      });
+      showMsg('رمز عبور جدید باید حداقل ۶ کاراکتر باشد', true);
       return;
     }
-
     setIsChangingPassword(true);
     try {
-      await userService.changePassword(
-        user.id,
-        passwordData.currentPassword,
-        passwordData.newPassword
-      );
-      toast({
-        title: 'موفق',
-        description: 'رمز عبور با موفقیت تغییر کرد',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-        position: 'top-left',
-      });
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
-    } catch (error) {
-      toast({
-        title: 'خطا',
-        description:
-          error.response?.data?.message || 'خطا در تغییر رمز عبور',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-        position: 'top-left',
-      });
+      await userService.changePassword(user.id, passwordData.currentPassword, passwordData.newPassword);
+      showMsg('رمز عبور با موفقیت تغییر کرد');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      showMsg(err.response?.data?.message || 'خطا در تغییر رمز عبور', true);
     } finally {
       setIsChangingPassword(false);
     }
   };
 
-  const getRoleBadgeColor = (role) => {
-    switch (role) {
-      case 'ADMIN':
-        return 'red';
-      case 'MANAGER':
-        return 'purple';
-      default:
-        return 'blue';
-    }
-  };
-
-  const getRoleLabel = (role) => {
-    switch (role) {
-      case 'ADMIN':
-        return 'مدیر سیستم';
-      case 'MANAGER':
-        return 'مدیر محصول';
-      default:
-        return 'کاربر';
-    }
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('fa-IR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  const tabs = [
+    { value: 'profile', label: 'اطلاعات شخصی', icon: Edit3 },
+    { value: 'password', label: 'تغییر رمز عبور', icon: Lock },
+  ];
 
   return (
-    <Box maxW="6xl" mx="auto">
-      <VStack spacing={6} align="stretch">
-        {/* Header */}
-        <Box>
-          <Heading size="lg" mb={2}>
-            پروفایل کاربری
-          </Heading>
-          <Text color="gray.500">
-            اطلاعات شخصی خود را مدیریت کنید
-          </Text>
-        </Box>
+    <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 20 }}>
+      {/* Sidebar */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <Card>
+          <div style={{ padding: '24px 20px', textAlign: 'center' }}>
+            <div
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #8b5cf6, #3b82f6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 28,
+                fontWeight: 700,
+                color: 'white',
+                margin: '0 auto 16px',
+                boxShadow: '0 4px 20px rgba(139,92,246,0.3)',
+              }}
+            >
+              {userInitial}
+            </div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
+              {user?.firstName && user?.lastName
+                ? `${user.firstName} ${user.lastName}`
+                : user?.displayName || user?.email}
+            </div>
+            {user?.nickname && (
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+                @{user.nickname}
+              </div>
+            )}
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '5px 12px',
+                borderRadius: 99,
+                fontSize: 12,
+                fontWeight: 600,
+                background: roleColor.bg,
+                color: roleColor.color,
+              }}
+            >
+              <Shield size={12} />
+              {roleLabels[user?.role] || 'کاربر'}
+            </span>
+          </div>
 
-        <Grid templateColumns={{ base: '1fr', lg: '300px 1fr' }} gap={6}>
-          {/* Right Sidebar - User Info */}
-          <GridItem>
-            <Card bg={bgColor} borderWidth="1px" borderColor={borderColor}>
-              <CardBody>
-                <VStack spacing={4}>
-                  {/* Avatar */}
-                  <Box position="relative">
-                    <Avatar
-                      size="2xl"
-                      name={user?.displayName}
-                      src={profileData.avatar}
-                      bg="brand.500"
-                    >
-                      <AvatarBadge
-                        as={IconButton}
-                        size="sm"
-                        rounded="full"
-                        top="-2"
-                        colorScheme="brand"
-                        aria-label="تغییر عکس"
-                        icon={<Camera size={16} />}
-                        onClick={handleAvatarClick}
+          <div style={{ borderTop: '1px solid var(--border)', padding: '16px 20px' }}>
+            {[
+              { icon: Mail, label: user?.email || '—' },
+              { icon: Phone, label: user?.phone || 'شماره تماس ثبت نشده' },
+              { icon: User, label: `عضو از ${user?.createdAt ? new Date(user.createdAt).toLocaleDateString('fa-IR') : '—'}` },
+            ].map(({ icon: Icon, label }, i) => (
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '8px 0',
+                  borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.03)' : 'none',
+                }}
+              >
+                <Icon size={14} color="var(--text-muted)" />
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: 'var(--text-secondary)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    direction: i === 0 ? 'ltr' : 'rtl',
+                  }}
+                >
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Tab Nav */}
+        <Card>
+          <div style={{ padding: '8px' }}>
+            {tabs.map((t) => (
+              <div
+                key={t.value}
+                onClick={() => setActiveTab(t.value)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 12px',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  transition: 'var(--transition)',
+                  color: activeTab === t.value ? 'var(--accent-gold)' : 'var(--text-secondary)',
+                  background: activeTab === t.value ? 'rgba(245,158,11,0.1)' : 'transparent',
+                  fontSize: 13,
+                  fontWeight: activeTab === t.value ? 600 : 400,
+                }}
+              >
+                <t.icon size={16} />
+                {t.label}
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* Content */}
+      <div>
+        {(successMsg || errorMsg) && (
+          <div
+            style={{
+              background: successMsg ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+              border: `1px solid ${successMsg ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
+              borderRadius: 10,
+              padding: '10px 16px',
+              fontSize: 13,
+              color: successMsg ? '#34d399' : '#f87171',
+              marginBottom: 16,
+            }}
+          >
+            {successMsg || errorMsg}
+          </div>
+        )}
+
+        {activeTab === 'profile' && (
+          <Card>
+            <div
+              style={{
+                padding: '18px 20px',
+                borderBottom: '1px solid var(--border)',
+                fontSize: 14,
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+              }}
+            >
+              اطلاعات شخصی
+            </div>
+            <form onSubmit={handleProfileSubmit} style={{ padding: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                {/* Display Name (readonly) */}
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6, fontWeight: 500 }}>
+                    نام اصلی
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <User size={15} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                    <input
+                      value={user?.displayName || ''}
+                      readOnly
+                      style={readOnlyInputStyle}
+                    />
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>فقط مدیر سیستم می‌تواند تغییر دهد</div>
+                </div>
+
+                {/* Nickname */}
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6, fontWeight: 500 }}>
+                    نام مستعار
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <Edit3 size={15} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                    <input
+                      value={profileData.nickname}
+                      onChange={(e) => setProfileData((p) => ({ ...p, nickname: e.target.value }))}
+                      placeholder="نام مستعار"
+                      style={inputStyle}
+                      onFocus={(e) => (e.target.style.borderColor = 'var(--accent-gold)')}
+                      onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
+                    />
+                  </div>
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6, fontWeight: 500 }}>
+                    شماره تماس
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <Phone size={15} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                    <input
+                      value={profileData.phone}
+                      onChange={(e) => setProfileData((p) => ({ ...p, phone: e.target.value }))}
+                      placeholder="09121234567"
+                      style={{ ...inputStyle, direction: 'ltr', textAlign: 'left' }}
+                      onFocus={(e) => (e.target.style.borderColor = 'var(--accent-gold)')}
+                      onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
+                    />
+                  </div>
+                </div>
+
+                {/* Email (readonly) */}
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6, fontWeight: 500 }}>
+                    ایمیل
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <Mail size={15} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                    <input
+                      value={user?.email || ''}
+                      readOnly
+                      style={{ ...readOnlyInputStyle, direction: 'ltr', textAlign: 'left' }}
+                    />
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>ایمیل قابل تغییر نیست</div>
+                </div>
+              </div>
+
+              {/* Bio */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6, fontWeight: 500 }}>
+                  درباره من
+                </label>
+                <textarea
+                  value={profileData.bio}
+                  onChange={(e) => setProfileData((p) => ({ ...p, bio: e.target.value }))}
+                  placeholder="توضیحاتی درباره خودتان بنویسید..."
+                  rows={4}
+                  style={{ ...inputStyle, padding: '10px 14px', resize: 'vertical' }}
+                  onFocus={(e) => (e.target.style.borderColor = 'var(--accent-gold)')}
+                  onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 7,
+                  padding: '10px 20px',
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+                  color: 'white',
+                  border: 'none',
+                  opacity: isLoading ? 0.7 : 1,
+                }}
+              >
+                {isLoading ? 'در حال ذخیره...' : <><Save size={14} /> ذخیره تغییرات</>}
+              </button>
+            </form>
+          </Card>
+        )}
+
+        {activeTab === 'password' && (
+          <Card>
+            <div
+              style={{
+                padding: '18px 20px',
+                borderBottom: '1px solid var(--border)',
+                fontSize: 14,
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+              }}
+            >
+              تغییر رمز عبور
+            </div>
+            <form onSubmit={handlePasswordSubmit} style={{ padding: 20, maxWidth: 400 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>
+                برای تغییر رمز عبور، رمز عبور فعلی و جدید خود را وارد کنید. رمز عبور باید حداقل ۶ کاراکتر باشد.
+              </div>
+
+              {['currentPassword', 'newPassword', 'confirmPassword'].map((field, i) => {
+                const labels = ['رمز عبور فعلی', 'رمز عبور جدید', 'تکرار رمز عبور جدید'];
+                return (
+                  <div key={field} style={{ marginBottom: 16 }}>
+                    <label style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6, fontWeight: 500 }}>
+                      {labels[i]}
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={15} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                      <input
+                        type="password"
+                        value={passwordData[field]}
+                        onChange={(e) => setPasswordData((p) => ({ ...p, [field]: e.target.value }))}
+                        placeholder="••••••••"
+                        style={inputStyle}
+                        onFocus={(e) => (e.target.style.borderColor = 'var(--accent-gold)')}
+                        onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                       />
-                    </Avatar>
-                  </Box>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleAvatarChange}
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                  />
+                    </div>
+                  </div>
+                );
+              })}
 
-                  {/* User Info */}
-                  <VStack spacing={1}>
-                    <Heading size="md">{user?.displayName}</Heading>
-                    <Text color="gray.500" fontSize="sm">
-                      @{user?.nickname}
-                    </Text>
-                    <Badge colorScheme={getRoleBadgeColor(user?.role)}>
-                      {getRoleLabel(user?.role)}
-                    </Badge>
-                  </VStack>
-
-                  <Divider />
-
-                  {/* Info Items */}
-                  <VStack spacing={3} w="full" align="stretch">
-                    <HStack spacing={3}>
-                      <Icon as={Mail} color="gray.400" />
-                      <Text fontSize="sm" color="gray.600" isTruncated>
-                        {user?.email}
-                      </Text>
-                    </HStack>
-                    <HStack spacing={3}>
-                      <Icon as={Calendar} color="gray.400" />
-                      <Text fontSize="sm" color="gray.600">
-                        عضو از {formatDate(user?.createdAt)}
-                      </Text>
-                    </HStack>
-                  </VStack>
-                </VStack>
-              </CardBody>
-            </Card>
-          </GridItem>
-
-          {/* Left Content - Forms */}
-          <GridItem>
-            <Tabs isFitted variant="enclosed">
-              <TabList mb={4}>
-                <Tab
-                  _selected={{ color: 'brand.500', borderColor: 'brand.500' }}
-                >
-                  <HStack>
-                    <Edit3 size={18} />
-                    <Text>اطلاعات شخصی</Text>
-                  </HStack>
-                </Tab>
-                <Tab
-                  _selected={{ color: 'brand.500', borderColor: 'brand.500' }}
-                >
-                  <HStack>
-                    <Lock size={18} />
-                    <Text>تغییر رمز عبور</Text>
-                  </HStack>
-                </Tab>
-              </TabList>
-
-              <TabPanels>
-                {/* Profile Info Tab */}
-                <TabPanel p={0}>
-                  <Card bg={bgColor} borderWidth="1px" borderColor={borderColor}>
-                    <CardBody>
-                      <form onSubmit={handleProfileSubmit}>
-                        <VStack spacing={6} align="stretch">
-                          {/* Names Section */}
-                          <Box>
-                            <Heading size="sm" mb={4}>
-                              نام‌ها
-                            </Heading>
-                            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                              <FormControl isReadOnly>
-                                <FormLabel>نام اصلی</FormLabel>
-                                <InputGroup>
-                                  <InputLeftElement>
-                                    <User color="#A0AEC0" />
-                                  </InputLeftElement>
-                                  <Input
-                                    value={user?.displayName || ''}
-                                    isReadOnly
-                                    bg="gray.100"
-                                  />
-                                </InputGroup>
-                                <FormHelperText>
-                                  فقط مدیر سیستم می‌تواند این فیلد را تغییر دهد
-                                </FormHelperText>
-                              </FormControl>
-
-                              <FormControl>
-                                <FormLabel>نام مستعار</FormLabel>
-                                <InputGroup>
-                                  <InputLeftElement>
-                                    <Edit3 color="#A0AEC0" />
-                                  </InputLeftElement>
-                                  <Input
-                                    name="nickname"
-                                    value={profileData.nickname}
-                                    onChange={handleProfileChange}
-                                    placeholder="نام مستعار خود را وارد کنید"
-                                  />
-                                </InputGroup>
-                                <FormHelperText>
-                                  این نام در سیستم نمایش داده می‌شود
-                                </FormHelperText>
-                              </FormControl>
-                            </SimpleGrid>
-                          </Box>
-
-                          <Divider />
-
-                          {/* Contact Info Section */}
-                          <Box>
-                            <Heading size="sm" mb={4}>
-                              اطلاعات تماس
-                            </Heading>
-                            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                              <FormControl>
-                                <FormLabel>شماره تماس</FormLabel>
-                                <InputGroup>
-                                  <InputLeftElement>
-                                    <Phone color="#A0AEC0" />
-                                  </InputLeftElement>
-                                  <Input
-                                    name="phone"
-                                    value={profileData.phone}
-                                    onChange={handleProfileChange}
-                                    placeholder="شماره تماس خود را وارد کنید"
-                                  />
-                                </InputGroup>
-                              </FormControl>
-
-                              <FormControl isReadOnly>
-                                <FormLabel>ایمیل</FormLabel>
-                                <InputGroup>
-                                  <InputLeftElement>
-                                    <Mail color="#A0AEC0" />
-                                  </InputLeftElement>
-                                  <Input
-                                    value={user?.email || ''}
-                                    isReadOnly
-                                    bg="gray.100"
-                                  />
-                                </InputGroup>
-                                <FormHelperText>
-                                  ایمیل قابل تغییر نیست
-                                </FormHelperText>
-                              </FormControl>
-                            </SimpleGrid>
-                          </Box>
-
-                          <Divider />
-
-                          {/* Bio Section */}
-                          <Box>
-                            <Heading size="sm" mb={4}>
-                              درباره من
-                            </Heading>
-                            <FormControl>
-                              <FormLabel>توضیحات</FormLabel>
-                              <Textarea
-                                name="bio"
-                                value={profileData.bio}
-                                onChange={handleProfileChange}
-                                placeholder="توضیحاتی درباره خودتان بنویسید..."
-                                rows={4}
-                              />
-                            </FormControl>
-                          </Box>
-
-                          <Button
-                            type="submit"
-                            colorScheme="brand"
-                            size="lg"
-                            isLoading={isLoading}
-                            rightIcon={<Save size={20} />}
-                          >
-                            ذخیره تغییرات
-                          </Button>
-                        </VStack>
-                      </form>
-                    </CardBody>
-                  </Card>
-                </TabPanel>
-
-                {/* Password Change Tab */}
-                <TabPanel p={0}>
-                  <Card bg={bgColor} borderWidth="1px" borderColor={borderColor}>
-                    <CardBody>
-                      <form onSubmit={handlePasswordChange}>
-                        <VStack spacing={6} align="stretch">
-                          <Box>
-                            <Heading size="sm" mb={4}>
-                              تغییر رمز عبور
-                            </Heading>
-                            <Text color="gray.500" fontSize="sm" mb={4}>
-                              برای تغییر رمز عبور، رمز عبور فعلی و جدید خود را وارد
-                              کنید
-                            </Text>
-                          </Box>
-
-                          <FormControl isRequired>
-                            <FormLabel>رمز عبور فعلی</FormLabel>
-                            <InputGroup>
-                              <InputLeftElement>
-                                <Lock color="#A0AEC0" />
-                              </InputLeftElement>
-                              <Input
-                                type="password"
-                                value={passwordData.currentPassword}
-                                onChange={(e) =>
-                                  setPasswordData((prev) => ({
-                                    ...prev,
-                                    currentPassword: e.target.value,
-                                  }))
-                                }
-                                placeholder="رمز عبور فعلی را وارد کنید"
-                              />
-                            </InputGroup>
-                          </FormControl>
-
-                          <FormControl isRequired>
-                            <FormLabel>رمز عبور جدید</FormLabel>
-                            <InputGroup>
-                              <InputLeftElement>
-                                <Lock color="#A0AEC0" />
-                              </InputLeftElement>
-                              <Input
-                                type="password"
-                                value={passwordData.newPassword}
-                                onChange={(e) =>
-                                  setPasswordData((prev) => ({
-                                    ...prev,
-                                    newPassword: e.target.value,
-                                  }))
-                                }
-                                placeholder="رمز عبور جدید را وارد کنید"
-                              />
-                            </InputGroup>
-                            <FormHelperText>
-                              رمز عبور باید حداقل 6 کاراکتر باشد
-                            </FormHelperText>
-                          </FormControl>
-
-                          <FormControl isRequired>
-                            <FormLabel>تکرار رمز عبور جدید</FormLabel>
-                            <InputGroup>
-                              <InputLeftElement>
-                                <Lock color="#A0AEC0" />
-                              </InputLeftElement>
-                              <Input
-                                type="password"
-                                value={passwordData.confirmPassword}
-                                onChange={(e) =>
-                                  setPasswordData((prev) => ({
-                                    ...prev,
-                                    confirmPassword: e.target.value,
-                                  }))
-                                }
-                                placeholder="رمز عبور جدید را再次 وارد کنید"
-                              />
-                            </InputGroup>
-                          </FormControl>
-
-                          <Button
-                            type="submit"
-                            colorScheme="brand"
-                            size="lg"
-                            isLoading={isChangingPassword}
-                            rightIcon={<Lock size={20} />}
-                          >
-                            تغییر رمز عبور
-                          </Button>
-                        </VStack>
-                      </form>
-                    </CardBody>
-                  </Card>
-                </TabPanel>
-              </TabPanels>
-            </Tabs>
-          </GridItem>
-        </Grid>
-      </VStack>
-    </Box>
+              <button
+                type="submit"
+                disabled={isChangingPassword}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 7,
+                  padding: '10px 20px',
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: isChangingPassword ? 'not-allowed' : 'pointer',
+                  background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+                  color: 'white',
+                  border: 'none',
+                  opacity: isChangingPassword ? 0.7 : 1,
+                }}
+              >
+                {isChangingPassword ? 'در حال تغییر...' : <><Lock size={14} /> تغییر رمز عبور</>}
+              </button>
+            </form>
+          </Card>
+        )}
+      </div>
+    </div>
   );
 };
 

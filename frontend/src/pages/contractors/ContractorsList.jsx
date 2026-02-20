@@ -50,17 +50,6 @@ const ContractorsList = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('آیا از حذف این پیمانکار اطمینان دارید؟')) {
-      try {
-        await contractorsService.delete(id);
-        setContractors(contractors.filter((c) => c.id !== id));
-      } catch {
-        alert('خطا در حذف پیمانکار');
-      }
-    }
-  };
-
   const filtered = contractors.filter(
     (c) =>
       (c.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||

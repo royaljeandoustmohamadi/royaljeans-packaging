@@ -144,7 +144,6 @@ const Dashboard = () => {
     completionRate: 0,
   });
   const [recentOrders, setRecentOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [progWidths, setProgWidths] = useState([0, 0, 0, 0]);
 
   useEffect(() => {
@@ -154,7 +153,6 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      setLoading(true);
       const [ordersResponse, contractorsResponse] = await Promise.all([
         ordersService.getAll({ limit: 100 }),
         contractorsService.getAll(),
@@ -193,10 +191,8 @@ const Dashboard = () => {
       });
 
       setRecentOrders(orders.slice(0, 5));
-    } catch {
-      // Use mock data on error
-    } finally {
-      setLoading(false);
+    } catch (_e) {
+      // use fallback data
     }
   };
 

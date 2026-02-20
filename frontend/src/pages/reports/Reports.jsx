@@ -76,7 +76,6 @@ const Reports = () => {
   const [statsLoading, setStatsLoading] = useState(true);
   const [reportData, setReportData] = useState(null);
   const [filters, setFilters] = useState({ startDate: '', endDate: '', status: '' });
-  const [contractors, setContractors] = useState([]);
 
   useEffect(() => {
     loadInitialData();
@@ -85,9 +84,10 @@ const Reports = () => {
 
   const loadInitialData = async () => {
     try {
-      const r = await contractorsService.getAll();
-      setContractors(r.contractors || []);
-    } catch {}
+      await contractorsService.getAll();
+    } catch (_e) {
+      // ignore
+    }
   };
 
   const loadStatistics = async () => {
@@ -123,8 +123,9 @@ const Reports = () => {
             totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0,
         },
       });
-    } catch {}
-    finally {
+    } catch (_e) {
+      setReportData(null);
+    } finally {
       setStatsLoading(false);
     }
   };
@@ -150,8 +151,9 @@ const Reports = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-    } catch {}
-    finally {
+    } catch (_e) {
+      setLoading(false);
+    } finally {
       setLoading(false);
     }
   };

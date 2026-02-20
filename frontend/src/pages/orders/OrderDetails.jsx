@@ -1,58 +1,82 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Heading,
-  Button,
-  VStack,
-  HStack,
-  SimpleGrid,
-  Text,
-  Badge,
-  Card,
-  CardBody,
-  CardHeader,
-  Divider,
-  useToast,
-  Spinner,
-  IconButton,
-} from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowRight, 
-  Edit, 
-  Trash2, 
-  Download, 
-  Calendar,
-  User,
-  Package
-} from 'lucide-react';
+import { ArrowRight, Edit, Trash2, Download, Calendar, User, Package } from 'lucide-react';
 import ordersService from '../../services/orders.service';
+
+const statusMap = {
+  PENDING: { label: 'در انتظار', bg: 'rgba(148,163,184,0.1)', color: '#94a3b8' },
+  CONFIRMED: { label: 'تایید شده', bg: 'rgba(59,130,246,0.15)', color: '#60a5fa' },
+  IN_PROGRESS: { label: 'در حال تولید', bg: 'rgba(245,158,11,0.15)', color: '#fbbf24' },
+  READY: { label: 'آماده تحویل', bg: 'rgba(139,92,246,0.15)', color: '#a78bfa' },
+  DELIVERED: { label: 'تحویل شده', bg: 'rgba(16,185,129,0.15)', color: '#34d399' },
+  CANCELLED: { label: 'لغو شده', bg: 'rgba(239,68,68,0.15)', color: '#f87171' },
+  pending: { label: 'در انتظار', bg: 'rgba(148,163,184,0.1)', color: '#94a3b8' },
+  completed: { label: 'تکمیل شده', bg: 'rgba(16,185,129,0.15)', color: '#34d399' },
+};
+
+const Card = ({ title, children }) => (
+  <div
+    style={{
+      background: 'var(--bg-card)',
+      backdropFilter: 'blur(20px)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius)',
+      overflow: 'hidden',
+      marginBottom: 16,
+    }}
+  >
+    {title && (
+      <div
+        style={{
+          padding: '14px 20px',
+          borderBottom: '1px solid var(--border)',
+          fontSize: 13,
+          fontWeight: 700,
+          color: 'var(--text-primary)',
+        }}
+      >
+        {title}
+      </div>
+    )}
+    <div style={{ padding: '16px 20px' }}>{children}</div>
+  </div>
+);
+
+const InfoRow = ({ label, value, valueStyle }) => (
+  <div
+    style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      padding: '9px 0',
+      borderBottom: '1px solid rgba(255,255,255,0.03)',
+    }}
+  >
+    <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{label}</span>
+    <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', ...valueStyle }}>
+      {value ?? '—'}
+    </span>
+  </div>
+);
 
 const OrderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const toast = useToast();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchOrderDetails();
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchOrderDetails = async () => {
     try {
       setLoading(true);
       const response = await ordersService.getById(id);
       setOrder(response.order);
-    } catch (error) {
-      toast({
-        title: 'خطا',
-        description: 'خطا در دریافت جزئیات سفارش',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      navigate('/orders');
+    } catch (_err) {
+      setError('خطا در دریافت جزئیات سفارش');
+      setTimeout(() => navigate('/orders'), 2000);
     } finally {
       setLoading(false);
     }
@@ -62,374 +86,338 @@ const OrderDetails = () => {
     if (window.confirm('آیا از حذف این سفارش اطمینان دارید؟')) {
       try {
         await ordersService.delete(id);
-        toast({
-          title: 'موفقیت',
-          description: 'سفارش با موفقیت حذف شد',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
         navigate('/orders');
-      } catch (error) {
-        toast({
-          title: 'خطا',
-          description: 'خطا در حذف سفارش',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
+      } catch (_err) {
+        setError('خطا در حذف سفارش');
       }
     }
   };
 
-  const getStatusColor = (status) => {
-    const colors = {
-      pending: 'yellow',
-      processing: 'blue',
-      completed: 'green',
-      cancelled: 'red',
-    };
-    return colors[status] || 'gray';
-  };
-
-  const getStatusText = (status) => {
-    const texts = {
-      pending: 'در انتظار',
-      processing: 'در حال پردازش',
-      completed: 'تکمیل شده',
-      cancelled: 'لغو شده',
-    };
-    return texts[status] || status;
-  };
-
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minH="400px">
-        <Spinner size="xl" />
-      </Box>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+        <div
+          style={{
+            width: 40,
+            height: 40,
+            border: '3px solid var(--border)',
+            borderTopColor: 'var(--accent-gold)',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+          }}
+        />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
     );
   }
 
-  if (!order) {
+  if (error) {
     return (
-      <Box textAlign="center" py={10}>
-        <Text>سفارش یافت نشد</Text>
-      </Box>
+      <div
+        style={{
+          background: 'rgba(239,68,68,0.1)',
+          border: '1px solid rgba(239,68,68,0.3)',
+          borderRadius: 'var(--radius)',
+          padding: '20px',
+          textAlign: 'center',
+          color: '#f87171',
+        }}
+      >
+        {error}
+      </div>
     );
   }
+
+  if (!order) return null;
+
+  const statusInfo = statusMap[order.status?.toUpperCase()] || statusMap[order.status] || statusMap['PENDING'];
 
   return (
-    <Box p={6}>
+    <div className="animate-fadeUp">
       {/* Header */}
-      <HStack justify="space-between" mb={6}>
-        <HStack>
-          <IconButton
-            icon={<ArrowRight />}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 20,
+          flexWrap: 'wrap',
+          gap: 12,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
             onClick={() => navigate('/orders')}
-            variant="ghost"
-            size="sm"
-          />
-          <Heading size="lg">جزئیات سفارش</Heading>
-        </HStack>
-        
-        <HStack>
-          <Button
-            leftIcon={<Edit />}
-            colorScheme="blue"
-            onClick={() => navigate(`/orders/${id}/edit`)}
-          >
-            ویرایش
-          </Button>
-          <Button
-            leftIcon={<Download />}
-            variant="outline"
-            onClick={() => {
-              // TODO: Implement PDF export
-              toast({
-                title: 'در حال توسعه',
-                description: 'خروجی PDF در نسخه بعدی اضافه خواهد شد',
-                status: 'info',
-                duration: 3000,
-                isClosable: true,
-              });
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 14px',
+              borderRadius: 10,
+              fontSize: 13,
+              cursor: 'pointer',
+              background: 'rgba(255,255,255,0.05)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
             }}
           >
-            خروجی PDF
-          </Button>
-          <Button
-            leftIcon={<Trash2 />}
-            colorScheme="red"
-            variant="outline"
-            onClick={handleDelete}
+            <ArrowRight size={14} /> بازگشت
+          </button>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent-gold)' }}>
+              {order.orderNumber || order.code || `#${order.id}`}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+              {order.customerName || order.name || '—'}
+            </div>
+          </div>
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '5px 12px',
+              borderRadius: 99,
+              fontSize: 12,
+              fontWeight: 600,
+              background: statusInfo.bg,
+              color: statusInfo.color,
+            }}
           >
-            حذف
-          </Button>
-        </HStack>
-      </HStack>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', display: 'inline-block' }} />
+            {statusInfo.label}
+          </span>
+        </div>
 
-      <VStack spacing={6} align="stretch">
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={() => navigate(`/orders/${id}/edit`)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 14px',
+              borderRadius: 10,
+              fontSize: 13,
+              cursor: 'pointer',
+              background: 'rgba(59,130,246,0.15)',
+              color: '#60a5fa',
+              border: '1px solid rgba(59,130,246,0.2)',
+            }}
+          >
+            <Edit size={13} /> ویرایش
+          </button>
+          <button
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 14px',
+              borderRadius: 10,
+              fontSize: 13,
+              cursor: 'pointer',
+              background: 'rgba(255,255,255,0.05)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <Download size={13} /> PDF
+          </button>
+          <button
+            onClick={handleDelete}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 14px',
+              borderRadius: 10,
+              fontSize: 13,
+              cursor: 'pointer',
+              background: 'rgba(239,68,68,0.1)',
+              color: '#f87171',
+              border: '1px solid rgba(239,68,68,0.2)',
+            }}
+          >
+            <Trash2 size={13} /> حذف
+          </button>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         {/* Basic Info */}
-        <Card>
-          <CardHeader>
-            <Heading size="md">اطلاعات پایه</Heading>
-          </CardHeader>
-          <CardBody>
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-              <Box>
-                <Text fontWeight="bold" mb={1}>کد سفارش:</Text>
-                <Text color="gray.600">{order.code}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>نام سفارش:</Text>
-                <Text color="gray.600">{order.name}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>تاریخ:</Text>
-                <HStack>
-                  <Calendar size={16} />
-                  <Text color="gray.600">
-                    {new Date(order.date).toLocaleDateString('fa-IR')}
-                  </Text>
-                </HStack>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>وضعیت:</Text>
-                <Badge colorScheme={getStatusColor(order.status)} size="lg">
-                  {getStatusText(order.status)}
-                </Badge>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>کل تعداد:</Text>
-                <Text color="gray.600">{order.totalCount || '-'}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>تعداد بسته‌بندی:</Text>
-                <Text color="gray.600">{order.packingCount || '-'}</Text>
-              </Box>
-            </SimpleGrid>
-          </CardBody>
+        <Card title="اطلاعات پایه">
+          <InfoRow label="کد سفارش" value={order.orderNumber || order.code || `#${order.id}`} valueStyle={{ color: 'var(--accent-gold)' }} />
+          <InfoRow label="نام مشتری" value={order.customerName || order.name} />
+          <InfoRow
+            label="تاریخ سفارش"
+            value={order.orderDate || order.date ? new Date(order.orderDate || order.date).toLocaleDateString('fa-IR') : null}
+          />
+          <InfoRow label="کل تعداد" value={order.totalCount || order.quantity} />
+          <InfoRow label="اولویت" value={
+            { URGENT: 'فوری', HIGH: 'بالا', NORMAL: 'عادی', LOW: 'پایین' }[order.priority?.toUpperCase()] || order.priority
+          } />
         </Card>
 
         {/* Product Details */}
-        <Card>
-          <CardHeader>
-            <Heading size="md">مشخصات محصول</Heading>
-          </CardHeader>
-          <CardBody>
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-              <Box>
-                <Text fontWeight="bold" mb={1}>نوع پارچه:</Text>
-                <Text color="gray.600">{order.fabric || '-'}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>شستشو:</Text>
-                <Text color="gray.600">{order.stoneWash || '-'}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>استایل:</Text>
-                <Text color="gray.600">{order.style || '-'}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>تأمین‌کننده پارچه:</Text>
-                <Text color="gray.600">{order.fabricSupplier || '-'}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>تأمین‌کننده تولید:</Text>
-                <Text color="gray.600">{order.productionSupplier || '-'}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>نام بسته‌بندی:</Text>
-                <Text color="gray.600">{order.packingName || '-'}</Text>
-              </Box>
-            </SimpleGrid>
-          </CardBody>
+        <Card title="مشخصات محصول">
+          <InfoRow label="نوع پارچه" value={order.fabric} />
+          <InfoRow label="شستشو" value={order.stoneWash} />
+          <InfoRow label="استایل" value={order.style} />
+          <InfoRow label="تأمین‌کننده پارچه" value={order.fabricSupplier} />
+          <InfoRow label="تأمین‌کننده تولید" value={order.productionSupplier} />
         </Card>
 
-        {/* Size Distribution */}
-        <Card>
-          <CardHeader>
-            <Heading size="md">توزیع سایزها</Heading>
-          </CardHeader>
-          <CardBody>
-            <VStack spacing={6} align="stretch">
-              {/* Healthy Sizes */}
-              <Box>
-                <Heading size="sm" mb={3} color="green.600">سایزهای سالم</Heading>
-                <SimpleGrid columns={{ base: 2, md: 4, lg: 8 }} spacing={3}>
-                  {[
-                    { label: '30', value: order.size30_healthy },
-                    { label: '31', value: order.size31_healthy },
-                    { label: '32', value: order.size32_healthy },
-                    { label: '33', value: order.size33_healthy },
-                    { label: '34', value: order.size34_healthy },
-                    { label: '36', value: order.size36_healthy },
-                    { label: '38', value: order.size38_healthy },
-                    { label: '40', value: order.size40_healthy },
-                  ].map((size) => (
-                    <Box key={size.label} textAlign="center" p={2} bg="green.50" borderRadius="md">
-                      <Text fontSize="sm" color="gray.600">سایز {size.label}</Text>
-                      <Text fontWeight="bold">{size.value || 0}</Text>
-                    </Box>
+        {/* Stock Info */}
+        <Card title="اطلاعات موجودی">
+          {[
+            ['موجودی پارچه', order.stockFabric],
+            ['موجودی شستشو', order.stockWash],
+            ['موجودی تولید', order.stockProduction],
+            ['موجودی بسته‌بندی', order.stockPackaging],
+            ['قابل فروش', order.saleableCount],
+            ['ضایعات', order.waste, { color: 'var(--accent-red)' }],
+          ].map(([label, value, style]) => (
+            <InfoRow key={label} label={label} value={value ?? 0} valueStyle={style} />
+          ))}
+        </Card>
+
+        {/* Meta */}
+        <Card title="اطلاعات تکمیلی">
+          <InfoRow label="نوع (BU)" value={order.bu} />
+          <InfoRow label="سطح (BV)" value={order.bv} />
+          <InfoRow label="تکمیل‌کننده" value={order.finisher} />
+          <InfoRow label="کنترل‌کننده" value={order.controller} />
+          <InfoRow
+            label="تاریخ ایجاد"
+            value={order.createdAt ? new Date(order.createdAt).toLocaleDateString('fa-IR') : null}
+          />
+          <InfoRow label="ایجاد شده توسط" value={order.creator?.fullName || order.creator?.displayName} />
+          {order.description && (
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>توضیحات</div>
+              <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                {order.description}
+              </div>
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* Size Distribution */}
+      {(order.size30_healthy || order.size32_healthy) && (
+        <div
+          style={{
+            background: 'var(--bg-card)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius)',
+            overflow: 'hidden',
+            marginTop: 4,
+          }}
+        >
+          <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+            توزیع سایزها
+          </div>
+          <div style={{ padding: '16px 20px' }}>
+            {[
+              { title: 'سایزهای سالم', color: '#10b981', bg: 'rgba(16,185,129,0.1)', prefix: 'healthy' },
+              { title: 'سایزهای اقتصادی', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)', prefix: 'economy' },
+            ].map(({ title, color, bg, prefix }) => (
+              <div key={prefix} style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color, marginBottom: 8 }}>{title}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {[30, 31, 32, 33, 34, 36, 38, 40].map((size) => (
+                    <div
+                      key={size}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: 8,
+                        background: bg,
+                        border: `1px solid ${color}30`,
+                        textAlign: 'center',
+                        minWidth: 60,
+                      }}
+                    >
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 2 }}>سایز {size}</div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color }}>
+                        {order[`size${size}_${prefix}`] || 0}
+                      </div>
+                    </div>
                   ))}
-                </SimpleGrid>
-              </Box>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-              <Divider />
+      {/* Accessories */}
+      {(order.accessories_button || order.accessories_rivet) && (
+        <div
+          style={{
+            background: 'var(--bg-card)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius)',
+            overflow: 'hidden',
+            marginTop: 16,
+          }}
+        >
+          <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+            ملزومات
+          </div>
+          <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+            {[
+              ['دکمه', order.accessories_button],
+              ['ریوت', order.accessories_rivet],
+              ['کارت جیب', order.accessories_pocketCard],
+              ['کارت سایز', order.accessories_sizeCard],
+              ['آویز', order.accessories_hanger],
+              ['نوار', order.accessories_band],
+              ['چرم', order.accessories_leather],
+            ].map(([label, value]) => (
+              <div
+                key={label}
+                style={{
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{label}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{value || 0}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-              {/* Economy Sizes */}
-              <Box>
-                <Heading size="sm" mb={3} color="blue.600">سایزهای اقتصادی</Heading>
-                <SimpleGrid columns={{ base: 2, md: 4, lg: 8 }} spacing={3}>
-                  {[
-                    { label: '30', value: order.size30_economy },
-                    { label: '31', value: order.size31_economy },
-                    { label: '32', value: order.size32_economy },
-                    { label: '33', value: order.size33_economy },
-                    { label: '34', value: order.size34_economy },
-                    { label: '36', value: order.size36_economy },
-                    { label: '38', value: order.size38_economy },
-                    { label: '40', value: order.size40_economy },
-                  ].map((size) => (
-                    <Box key={size.label} textAlign="center" p={2} bg="blue.50" borderRadius="md">
-                      <Text fontSize="sm" color="gray.600">سایز {size.label}</Text>
-                      <Text fontWeight="bold">{size.value || 0}</Text>
-                    </Box>
-                  ))}
-                </SimpleGrid>
-              </Box>
-            </VStack>
-          </CardBody>
-        </Card>
-
-        {/* Stock Information */}
-        <Card>
-          <CardHeader>
-            <Heading size="md">اطلاعات موجودی</Heading>
-          </CardHeader>
-          <CardBody>
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-              <Box>
-                <Text fontWeight="bold" mb={1}>موجودی پارچه:</Text>
-                <Text color="gray.600">{order.stockFabric || 0}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>موجودی شستشو:</Text>
-                <Text color="gray.600">{order.stockWash || 0}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>موجودی تولید:</Text>
-                <Text color="gray.600">{order.stockProduction || 0}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>موجودی بسته‌بندی:</Text>
-                <Text color="gray.600">{order.stockPackaging || 0}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>قابل فروش:</Text>
-                <Text color="gray.600">{order.saleableCount || 0}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>ضایعات:</Text>
-                <Text color="gray.600">{order.waste || 0}</Text>
-              </Box>
-            </SimpleGrid>
-          </CardBody>
-        </Card>
-
-        {/* Accessories */}
-        <Card>
-          <CardHeader>
-            <Heading size="md">ملزومات</Heading>
-          </CardHeader>
-          <CardBody>
-            <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} spacing={4}>
-              <Box>
-                <Text fontWeight="bold" mb={1}>دکمه:</Text>
-                <Text color="gray.600">{order.accessories_button || 0}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>ن rivet:</Text>
-                <Text color="gray.600">{order.accessories_rivet || 0}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>کارت جیب:</Text>
-                <Text color="gray.600">{order.accessories_pocketCard || 0}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>کارت سایز:</Text>
-                <Text color="gray.600">{order.accessories_sizeCard || 0}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>آویز:</Text>
-                <Text color="gray.600">{order.accessories_hanger || 0}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>نوار:</Text>
-                <Text color="gray.600">{order.accessories_band || 0}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold" mb={1}>چرم:</Text>
-                <Text color="gray.600">{order.accessories_leather || 0}</Text>
-              </Box>
-            </SimpleGrid>
-          </CardBody>
-        </Card>
-
-        {/* Personnel & Notes */}
-        <Card>
-          <CardHeader>
-            <Heading size="md">پرسنل و توضیحات</Heading>
-          </CardHeader>
-          <CardBody>
-            <VStack spacing={4} align="stretch">
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                <Box>
-                  <Text fontWeight="bold" mb={1}>نوع سفارش (BU):</Text>
-                  <Text color="gray.600">{order.bu || '-'}</Text>
-                </Box>
-                <Box>
-                  <Text fontWeight="bold" mb={1}>سطح سفارش (BV):</Text>
-                  <Text color="gray.600">{order.bv || '-'}</Text>
-                </Box>
-                <Box>
-                  <Text fontWeight="bold" mb={1}>تکمیل‌کننده:</Text>
-                  <Text color="gray.600">{order.finisher || '-'}</Text>
-                </Box>
-                <Box>
-                  <Text fontWeight="bold" mb={1}>کنترل‌کننده:</Text>
-                  <Text color="gray.600">{order.controller || '-'}</Text>
-                </Box>
-              </SimpleGrid>
-              
-              {order.description && (
-                <Box>
-                  <Text fontWeight="bold" mb={2}>توضیحات:</Text>
-                  <Text color="gray.600" whiteSpace="pre-wrap">{order.description}</Text>
-                </Box>
-              )}
-            </VStack>
-          </CardBody>
-        </Card>
-
-        {/* Metadata */}
-        <Card>
-          <CardBody>
-            <HStack spacing={6} fontSize="sm" color="gray.500">
-              <HStack>
-                <User size={16} />
-                <Text>ایجاد شده توسط: {order.creator?.fullName || 'نامشخص'}</Text>
-              </HStack>
-              <HStack>
-                <Calendar size={16} />
-                <Text>
-                  تاریخ ایجاد: {new Date(order.createdAt).toLocaleDateString('fa-IR')}
-                </Text>
-              </HStack>
-            </HStack>
-          </CardBody>
-        </Card>
-      </VStack>
-    </Box>
+      {/* Footer Meta */}
+      <div
+        style={{
+          display: 'flex',
+          gap: 20,
+          padding: '12px 0',
+          fontSize: 12,
+          color: 'var(--text-muted)',
+          marginTop: 8,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <User size={13} />
+          ایجاد شده توسط: {order.creator?.fullName || order.creator?.displayName || 'نامشخص'}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Calendar size={13} />
+          {order.createdAt ? new Date(order.createdAt).toLocaleDateString('fa-IR') : '—'}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Package size={13} />
+          کل تعداد: {order.totalCount || 0}
+        </div>
+      </div>
+    </div>
   );
 };
 

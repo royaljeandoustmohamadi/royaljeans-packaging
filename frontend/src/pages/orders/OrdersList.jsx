@@ -92,17 +92,6 @@ const OrdersList = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('آیا از حذف این سفارش اطمینان دارید؟')) {
-      try {
-        await ordersService.delete(id);
-        setOrders(orders.filter((o) => o.id !== id));
-      } catch {
-        alert('خطا در حذف سفارش');
-      }
-    }
-  };
-
   const filterByTab = (order) => {
     const status = order.status?.toUpperCase() || order.status || '';
     switch (activeTab) {

@@ -290,8 +290,8 @@ const ProductsPage = () => {
                       >
                         <div style={{ display: 'flex', gap: 6 }}>
                           {[
-                            { icon: Eye, onClick: () => {} },
-                            { icon: Edit2, onClick: () => {} },
+                            { icon: Eye, onClick: () => navigate(`/products/${p.id}`) },
+                            { icon: Edit2, onClick: () => navigate(`/products/${p.id}/edit`) },
                           ].map(({ icon: Icon, onClick }, idx) => (
                             <button
                               key={idx}

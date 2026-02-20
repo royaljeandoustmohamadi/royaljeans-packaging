@@ -52,7 +52,7 @@ const Card = ({ children, style }) => (
 );
 
 const WorkflowPage = () => {
-  const [stages, setStages] = useState(workflowStages);
+  const [stages] = useState(workflowStages);
 
   const getCircleStyle = (status) => {
     if (status === 'done')
