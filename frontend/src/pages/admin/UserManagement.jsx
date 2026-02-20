@@ -523,6 +523,7 @@ const UserManagement = () => {
                       </Badge>
                     </HStack>
                 </VStack>
+              </VStack>
               )}
             </DrawerBody>
 
