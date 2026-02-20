@@ -235,8 +235,11 @@ model Permission {
   id       Int    @id @default(autoincrement())
   roleId   Int
   role     Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  resource String // 'orders', 'contractors', 'reports'
-  action   String // 'create', 'read', 'update', 'delete'
+  resource String // 'orders', 'contractors', 'reports', 'inventory', '*'
+  action   String // 'create', 'read', 'update', 'delete', '*'
+  scope    String @default("all") // 'all', 'own', 'department'
+  // 'own' = فقط داده‌هایی که خودش ثبت کرده
+  // 'department' = داده‌های دپارتمان خودش
   
   @@unique([roleId, resource, action])
   @@index([roleId])
@@ -247,6 +250,137 @@ model Permission {
 - تفکیک نام به firstName و lastName
 - سیستم نقش و دسترسی پیشرفته‌تر
 - امکان تعریف دسترسی دقیق برای هر نقش
+- اضافه شدن `scope` برای محدودیت دسترسی ('all', 'own', 'department')
+
+---
+
+### 1.1 سطوح دسترسی و نقش‌ها (RBAC)
+
+#### نقش‌های پیش‌تعریف شده
+
+| نقش | مسئولیت | دسترسی کلی |
+|-----|---------|-----------|
+| **ADMIN** | مدیر سیستم | دسترسی کامل به همه بخش‌ها |
+| **MANAGER** | مدیر تولید | مدیریت سفارشات، گزارشات، پیمانکاران، کاربران |
+| **PRODUCTION** | تولید | فقط گردش کار و مراحل تولید |
+| **WAREHOUSE** | انباردار | انبارداری، موجودی، مواد اولیه |
+| **SALES** | فروش | ثبت سفارش، مشاهده وضعیت (فقط سفارشات خودش) |
+| **ACCOUNTANT** | حسابدار | گزارشات مالی، پرداخت‌ها، صورتحساب |
+
+#### تعریف Permissions برای هر نقش
+
+```javascript
+// config/permissions.js
+
+const ROLE_PERMISSIONS = {
+  admin: [
+    { resource: '*', action: '*', scope: 'all' } // همه چیز
+  ],
+  
+  manager: [
+    { resource: 'orders',      action: 'create', scope: 'all' },
+    { resource: 'orders',      action: 'read',   scope: 'all' },
+    { resource: 'orders',      action: 'update', scope: 'all' },
+    { resource: 'orders',      action: 'delete', scope: 'all' },
+    { resource: 'contractors', action: 'create', scope: 'all' },
+    { resource: 'contractors', action: 'read',   scope: 'all' },
+    { resource: 'contractors', action: 'update', scope: 'all' },
+    { resource: 'reports',     action: 'read',   scope: 'all' },
+    { resource: 'reports',     action: 'export', scope: 'all' },
+    { resource: 'users',       action: 'read',   scope: 'all' },
+    { resource: 'products',    action: 'read',   scope: 'all' },
+    { resource: 'inventory',   action: 'read',   scope: 'all' },
+    { resource: 'payments',    action: 'read',   scope: 'all' },
+  ],
+  
+  production: [
+    { resource: 'orders',    action: 'read',   scope: 'all' },
+    { resource: 'workflow',  action: 'read',   scope: 'all' },
+    { resource: 'workflow',  action: 'update', scope: 'all' },
+    { resource: 'workflow',  action: 'create', scope: 'all' },
+    { resource: 'inventory', action: 'read',   scope: 'all' },
+    { resource: 'products',  action: 'read',   scope: 'all' },
+  ],
+  
+  warehouse: [
+    { resource: 'inventory', action: 'create', scope: 'all' },
+    { resource: 'inventory', action: 'read',   scope: 'all' },
+    { resource: 'inventory', action: 'update', scope: 'all' },
+    { resource: 'materials', action: 'create', scope: 'all' },
+    { resource: 'materials', action: 'read',   scope: 'all' },
+    { resource: 'materials', action: 'update', scope: 'all' },
+    { resource: 'orders',    action: 'read',   scope: 'all' },
+    { resource: 'products',  action: 'read',   scope: 'all' },
+  ],
+  
+  sales: [
+    { resource: 'orders',   action: 'create', scope: 'all' },
+    { resource: 'orders',   action: 'read',   scope: 'own' }, // فقط سفارش خودش
+    { resource: 'orders',   action: 'update', scope: 'own' },
+    { resource: 'products', action: 'read',   scope: 'all' },
+    { resource: 'payments', action: 'read',   scope: 'own' },
+  ],
+  
+  accountant: [
+    { resource: 'orders',   action: 'read',   scope: 'all' },
+    { resource: 'payments', action: 'create', scope: 'all' },
+    { resource: 'payments', action: 'read',   scope: 'all' },
+    { resource: 'payments', action: 'update', scope: 'all' },
+    { resource: 'reports',  action: 'read',   scope: 'all' },
+    { resource: 'reports',  action: 'export', scope: 'all' },
+    { resource: 'contractors', action: 'read', scope: 'all' },
+  ],
+};
+
+module.exports = { ROLE_PERMISSIONS };
+```
+
+#### Seed Roles و Permissions
+
+```javascript
+// prisma/seed-roles.js
+async function seedRoles() {
+  const roles = [
+    { name: 'Admin',       slug: 'admin',       description: 'مدیر سیستم - دسترسی کامل' },
+    { name: 'Manager',     slug: 'manager',     description: 'مدیر تولید' },
+    { name: 'Production',  slug: 'production',  description: 'مسئول تولید' },
+    { name: 'Warehouse',   slug: 'warehouse',   description: 'انباردار' },
+    { name: 'Sales',       slug: 'sales',       description: 'کارشناس فروش' },
+    { name: 'Accountant',  slug: 'accountant',  description: 'حسابدار' },
+  ];
+
+  for (const roleData of roles) {
+    const role = await prisma.role.upsert({
+      where: { slug: roleData.slug },
+      update: {},
+      create: roleData,
+    });
+
+    // Add permissions for this role
+    const permissions = ROLE_PERMISSIONS[roleData.slug];
+    if (permissions) {
+      for (const perm of permissions) {
+        await prisma.permission.upsert({
+          where: {
+            roleId_resource_action: {
+              roleId: role.id,
+              resource: perm.resource,
+              action: perm.action,
+            },
+          },
+          update: { scope: perm.scope },
+          create: {
+            roleId: role.id,
+            resource: perm.resource,
+            action: perm.action,
+            scope: perm.scope,
+          },
+        });
+      }
+    }
+  }
+}
+```
 
 ---
 
@@ -1180,6 +1314,7 @@ backend/src/
 │   └── constants.js
 ├── middleware/
 │   ├── auth.js
+│   ├── checkPermission.js    // ← جدید
 │   ├── validate.js
 │   ├── errorHandler.js
 │   └── audit.js
@@ -1231,7 +1366,296 @@ backend/src/
     └── notifications.js
 ```
 
-### 2. API Endpoints جدید
+### 2. Permission Middleware (کنترل دسترسی)
+
+```javascript
+// middleware/checkPermission.js
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+/**
+ * Middleware برای چک کردن دسترسی کاربر
+ * @param {string} resource - منبع (orders, contractors, etc.)
+ * @param {string} action - عمل (create, read, update, delete)
+ * @returns {Function} Express middleware
+ */
+const checkPermission = (resource, action) => {
+  return async (req, res, next) => {
+    try {
+      const user = req.user; // از JWT میاد (set by auth middleware)
+      
+      if (!user) {
+        return res.status(401).json({ error: 'احراز هویت نشده' });
+      }
+      
+      // Admin همیشه رد میشه
+      if (user.role?.slug === 'admin') {
+        return next();
+      }
+      
+      // چک کن permission وجود داره؟
+      const permission = await prisma.permission.findFirst({
+        where: {
+          roleId: user.roleId,
+          OR: [
+            { resource: '*', action: '*' }, // wildcard permission
+            { resource, action: '*' },      // wildcard action
+            { resource, action },           // exact match
+          ]
+        }
+      });
+      
+      if (!permission) {
+        return res.status(403).json({ 
+          error: 'دسترسی مجاز نیست',
+          resource,
+          action
+        });
+      }
+      
+      // اگه scope = 'own' بود، فقط داده خودش رو ببینه
+      if (permission.scope === 'own') {
+        req.filterByUser = user.id;
+        req.userScope = 'own';
+      } else if (permission.scope === 'department') {
+        req.userScope = 'department';
+        req.userDepartment = user.departmentId; // اگه دپارتمان دارید
+      } else {
+        req.userScope = 'all';
+      }
+      
+      next();
+    } catch (error) {
+      console.error('Permission check error:', error);
+      res.status(500).json({ error: 'خطا در چک کردن دسترسی' });
+    }
+  };
+};
+
+/**
+ * Middleware ترکیبی: احراز هویت + دسترسی
+ */
+const requirePermission = (resource, action) => {
+  const { authenticate } = require('./auth');
+  return [authenticate, checkPermission(resource, action)];
+};
+
+module.exports = { 
+  checkPermission, 
+  requirePermission 
+};
+```
+
+#### استفاده در Routeها
+
+```javascript
+// routes/orders.js
+const { Router } = require('express');
+const { requirePermission } = require('../middleware/checkPermission');
+const orderController = require('../controllers/order.controller');
+
+const router = Router();
+
+// همه کاربران می‌تونن ببینن (با scope 'own' برای sales)
+router.get('/', 
+  ...requirePermission('orders', 'read'),
+  orderController.list
+);
+
+// فقط مدیر و فروش می‌تونن ثبت کنن
+router.post('/',
+  ...requirePermission('orders', 'create'),
+  orderController.create
+);
+
+// فقط مدیر می‌تونه ویرایش کنه
+router.put('/:id',
+  ...requirePermission('orders', 'update'),
+  orderController.update
+);
+
+// فقط ادمین می‌تونه حذف کنه
+router.delete('/:id',
+  ...requirePermission('orders', 'delete'),
+  orderController.delete
+);
+
+module.exports = router;
+```
+
+#### مدیریت Scope در Controller
+
+```javascript
+// controllers/order.controller.js
+const listOrders = async (req, res) => {
+  try {
+    const where = {};
+    
+    // اگه scope = 'own' بود، فقط سفارشات خودش
+    if (req.userScope === 'own') {
+      where.createdBy = req.filterByUser;
+    }
+    
+    const orders = await prisma.order.findMany({
+      where,
+      include: { items: true },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    res.json({ orders, scope: req.userScope });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { listOrders };
+```
+
+---
+
+### 3. Frontend Hook برای دسترسی
+
+```javascript
+// hooks/usePermission.js
+import { useMemo } from 'react';
+import { useAuthStore } from '../store/authStore';
+
+/**
+ * Hook برای چک کردن دسترسی کاربر
+ * @param {string} resource - منبع
+ * @param {string} action - عمل
+ * @returns {boolean} آیا دسترسی داره؟
+ */
+export function usePermission(resource, action) {
+  const { user } = useAuthStore();
+  
+  return useMemo(() => {
+    if (!user) return false;
+    
+    // Admin همیشه دسترسی داره
+    if (user.role?.slug === 'admin') return true;
+    
+    // چک کردن permissions
+    return user.permissions?.some(
+      p => (p.resource === resource || p.resource === '*') &&
+           (p.action === action || p.action === '*')
+    );
+  }, [user, resource, action]);
+}
+
+/**
+ * Hook برای چک کردن چند دسترسی
+ * @param {Array<{resource: string, action: string}>} permissions
+ * @returns {Object} object با کلیدهای resource_action
+ */
+export function usePermissions(permissions) {
+  const { user } = useAuthStore();
+  
+  return useMemo(() => {
+    const result = {};
+    
+    permissions.forEach(({ resource, action }) => {
+      const key = `${resource}_${action}`;
+      
+      if (!user) {
+        result[key] = false;
+        return;
+      }
+      
+      if (user.role?.slug === 'admin') {
+        result[key] = true;
+        return;
+      }
+      
+      result[key] = user.permissions?.some(
+        p => (p.resource === resource || p.resource === '*') &&
+             (p.action === action || p.action === '*')
+      );
+    });
+    
+    return result;
+  }, [user, permissions]);
+}
+```
+
+#### استفاده در کامپوننت‌ها
+
+```jsx
+// components/OrderPage.jsx
+import { usePermission, usePermissions } from '../hooks/usePermission';
+
+function OrderPage() {
+  // چک کردن تک دسترسی
+  const canCreate = usePermission('orders', 'create');
+  const canDelete = usePermission('orders', 'delete');
+  
+  // یا چک کردن چند دسترسی یکجا
+  const perms = usePermissions([
+    { resource: 'orders', action: 'create' },
+    { resource: 'orders', action: 'update' },
+    { resource: 'orders', action: 'delete' },
+    { resource: 'reports', action: 'read' },
+  ]);
+  
+  return (
+    <div>
+      <h1>مدیریت سفارشات</h1>
+      
+      {perms.orders_create && (
+        <button className="btn-primary">
+          ثبت سفارش جدید
+        </button>
+      )}
+      
+      {perms.orders_delete && (
+        <button className="btn-danger">
+          حذف سفارش
+        </button>
+      )}
+      
+      {perms.reports_read && (
+        <button className="btn-secondary">
+          مشاهده گزارشات
+        </button>
+      )}
+    </div>
+  );
+}
+
+export default OrderPage;
+```
+
+---
+
+### 4. نکات امنیتی ⚠️
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ⚠️  مهم: دسترسی رو همیشه در Backend چک کن!                │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ❌ اشتباه: فقط UI رو مخفی کردن                            │
+│     - یه کاربر می‌تونه مستقیم به API درخواست بزنه          │
+│     - DevTools باز کنه و درخواست بفرسته                     │
+│     - Postman/Insomnia استفاده کنه                          │
+│                                                              │
+│  ✅ درست: Middleware روی همه Endpointها                     │
+│     - checkPermission روی تمام routeها                      │
+│     - حتی اگه UI دکمه رو نشون نده، API محافظت شده است      │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### چک لیست امنیتی:
+- [ ] `checkPermission` روی **همه** API endpoints
+- [ ] حتی endpointهای read ساده هم محافظت شن
+- [ ] scope 'own' در controller پیاده‌سازی شود
+- [ ] لاگ کردن دسترسی‌های غیرمجاز
+- [ ] محدودیت تعداد درخواست (Rate Limiting)
+
+---
+
+### 5. API Endpoints جدید
 
 #### Orders Module
 ```javascript
