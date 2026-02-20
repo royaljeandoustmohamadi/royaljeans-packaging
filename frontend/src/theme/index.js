@@ -1,41 +1,35 @@
 import { extendTheme } from '@chakra-ui/react';
 
 const config = {
-  initialColorMode: 'light',
+  initialColorMode: 'dark',
   useSystemColorMode: false,
 };
 
 const colors = {
   brand: {
-    50: '#e3f2fd',
-    100: '#bbdefb',
-    200: '#90caf9',
-    300: '#64b5f6',
-    400: '#42a5f5',
-    500: '#2196f3',
-    600: '#1e88e5',
-    700: '#1976d2',
-    800: '#1565c0',
-    900: '#0d47a1',
+    50: '#fff8e7',
+    100: '#feefc3',
+    200: '#fdd88a',
+    300: '#fbbf24',
+    400: '#f59e0b',
+    500: '#d97706',
+    600: '#b45309',
+    700: '#92400e',
+    800: '#78350f',
+    900: '#451a03',
   },
-  jeans: {
-    50: '#f5f5f5',
-    100: '#e0e0e0',
-    200: '#bdbdbd',
-    300: '#9e9e9e',
-    400: '#757575',
-    500: '#616161',
-    600: '#424242',
-    700: '#37474f',
-    800: '#263238',
-    900: '#102027',
+  dark: {
+    50: '#f1f5f9',
+    100: '#e2e8f0',
+    200: '#94a3b8',
+    300: '#64748b',
+    400: '#475569',
+    500: '#334155',
+    600: '#1e293b',
+    700: '#111827',
+    800: '#0f172a',
+    900: '#0b0f1a',
   },
-  status: {
-    pending: '#ff9800',
-    inProgress: '#2196f3',
-    completed: '#4caf50',
-    cancelled: '#f44336',
-  }
 };
 
 const fonts = {
@@ -46,8 +40,20 @@ const fonts = {
 const styles = {
   global: {
     body: {
-      bg: 'gray.50',
-      color: 'gray.800',
+      bg: '#0b0f1a',
+      color: '#f1f5f9',
+      direction: 'rtl',
+    },
+    '*': {
+      boxSizing: 'border-box',
+    },
+  },
+};
+
+const components = {
+  Button: {
+    defaultProps: {
+      colorScheme: 'brand',
     },
   },
 };
@@ -58,6 +64,7 @@ const theme = extendTheme({
   colors,
   fonts,
   styles,
+  components,
 });
 
 export default theme;
