@@ -11,6 +11,7 @@ const userRoutes = require('./routes/users');
 const contractorRoutes = require('./routes/contractors');
 const reportsRoutes = require('./routes/reports');
 const settingsRoutes = require('./routes/settings');
+const avatarRoutes = require('./routes/avatars');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -25,6 +26,9 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -42,6 +46,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/contractors', contractorRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/users', avatarRoutes); // Avatar upload under users route
 
 // Error handling middleware
 app.use((err, req, res, next) => {

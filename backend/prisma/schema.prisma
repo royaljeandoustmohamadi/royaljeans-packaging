@@ -16,9 +16,21 @@ model User {
   id          Int      @id @default(autoincrement())
   email       String   @unique
   password    String   // bcrypt hashed
-  fullName    String
+  
+  // نام‌ها
+  displayName String   // نام اصلی (فقط ادمین می‌تونه تغییرش بده)
+  nickname    String   // نام مستعار - کاربر خودش می‌تونه تغییرش بده
+  
+  // اطلاعات تکمیلی
+  avatar      String?  // آدرس تصویر پروفایل
+  phone       String?
+  bio         String?  // توضیحات کاربر
+  
+  // نقش و وضعیت
   role        String   @default("USER") // ADMIN, MANAGER, USER
   isActive    Boolean  @default(true)
+  
+  // تاریخچه
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -28,6 +40,7 @@ model User {
   auditLogs   AuditLog[]
   
   @@index([email])
+  @@index([nickname])
 }
 
 // ─── ORDERS ───────────────────────────────────────────────────

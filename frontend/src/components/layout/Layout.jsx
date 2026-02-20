@@ -114,13 +114,21 @@ const Layout = () => {
               to="/reports"
               isActive={location.pathname.startsWith('/reports')}
             />
+            
+            {/* Admin Section */}
             {user?.role === 'ADMIN' && (
-              <SidebarItem
-                icon={Settings}
-                label="مدیریت"
-                to="/admin"
-                isActive={location.pathname.startsWith('/admin')}
-              />
+              <>
+                <Divider my={2} />
+                <Text fontSize="xs" fontWeight="bold" color="gray.400" px={4} alignSelf="flex-start">
+                  مدیریت
+                </Text>
+                <SidebarItem
+                  icon={Settings}
+                  label="کاربران"
+                  to="/admin/users"
+                  isActive={location.pathname.startsWith('/admin/users')}
+                />
+              </>
             )}
           </VStack>
 
@@ -129,10 +137,10 @@ const Layout = () => {
           {/* User Info */}
           <Box p={4} w="full">
             <Flex align="center">
-              <Avatar size="sm" name={user?.fullName} bg="brand.500" />
+              <Avatar size="sm" name={user?.displayName} src={user?.avatar} bg="brand.500" />
               <Box ml={3}>
                 <Text fontSize="sm" fontWeight="medium">
-                  {user?.fullName}
+                  {user?.displayName}
                 </Text>
                 <Text fontSize="xs" color="gray.500">
                   {user?.role === 'ADMIN' ? 'مدیر' : user?.role === 'MANAGER' ? 'مدیر محصول' : 'کاربر'}
@@ -169,11 +177,11 @@ const Layout = () => {
           <Menu>
             <MenuButton>
               <HStack spacing={3}>
-                <Avatar size="sm" name={user?.fullName} bg="brand.500" />
+                <Avatar size="sm" name={user?.displayName} src={user?.avatar} bg="brand.500" />
               </HStack>
             </MenuButton>
             <MenuList>
-              <MenuItem icon={<User size={16} />}>
+              <MenuItem icon={<User size={16} />} onClick={() => navigate('/profile')}>
                 پروفایل
               </MenuItem>
               <MenuItem icon={<LogOut size={16} />} onClick={handleLogout} color="red.500">

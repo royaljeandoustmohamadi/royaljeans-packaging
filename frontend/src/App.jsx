@@ -17,11 +17,19 @@ import ContractorsList from './pages/contractors/ContractorsList';
 import ContractorCreate from './pages/contractors/ContractorCreate';
 import Reports from './pages/reports/Reports';
 import AdminPanel from './pages/admin/AdminPanel';
+import UserManagement from './pages/admin/UserManagement';
+import ProfilePage from './pages/profile/ProfilePage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
   return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+// Admin Only Route Component
+const AdminOnly = ({ children }) => {
+  const { user } = useAuthStore();
+  return user?.role === 'ADMIN' ? children : <Navigate to="/" replace />;
 };
 
 // Public Route Component (redirects to home if authenticated)
@@ -63,7 +71,18 @@ function App() {
           <Route path="contractors" element={<ContractorsList />} />
           <Route path="contractors/new" element={<ContractorCreate />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="profile" element={<ProfilePage />} />
+          
+          {/* Admin Routes */}
           <Route path="admin" element={<AdminPanel />} />
+          <Route
+            path="admin/users"
+            element={
+              <AdminOnly>
+                <UserManagement />
+              </AdminOnly>
+            }
+          />
         </Route>
 
         {/* Fallback */}

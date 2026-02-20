@@ -12,7 +12,11 @@ router.get('/', authenticateToken, authorize('ADMIN', 'MANAGER'), async (req, re
       select: {
         id: true,
         email: true,
-        fullName: true,
+        displayName: true,
+        nickname: true,
+        avatar: true,
+        phone: true,
+        bio: true,
         role: true,
         isActive: true,
         createdAt: true,
@@ -43,7 +47,11 @@ router.get('/:id', authenticateToken, async (req, res) => {
       select: {
         id: true,
         email: true,
-        fullName: true,
+        displayName: true,
+        nickname: true,
+        avatar: true,
+        phone: true,
+        bio: true,
         role: true,
         isActive: true,
         createdAt: true,
@@ -66,7 +74,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { fullName, email, role, isActive } = req.body;
+    const { displayName, nickname, avatar, phone, bio, role, isActive } = req.body;
 
     // Only allow users to update their own profile unless they're admin
     if (req.user.role !== 'ADMIN' && req.user.id !== parseInt(id)) {
@@ -82,21 +90,22 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ message: 'کاربر یافت نشد' });
     }
 
-    // Only admin can change role and active status
-    const updateData = { fullName };
-    
-    if (req.user.role === 'ADMIN') {
-      if (email && email !== existingUser.email) {
-        const emailExists = await prisma.user.findUnique({
-          where: { email }
-        });
-        
-        if (emailExists) {
-          return res.status(400).json({ message: 'این ایمیل قبلاً استفاده شده است' });
-        }
-        updateData.email = email;
-      }
-      
+    // Build update data based on user role
+    const updateData = {};
+
+    // Non-admin users can only update their own editable fields (not email, role, isActive)
+    if (req.user.role !== 'ADMIN') {
+      if (nickname !== undefined) updateData.nickname = nickname;
+      if (avatar !== undefined) updateData.avatar = avatar;
+      if (phone !== undefined) updateData.phone = phone;
+      if (bio !== undefined) updateData.bio = bio;
+    } else {
+      // Admin can update all fields
+      if (displayName !== undefined) updateData.displayName = displayName;
+      if (nickname !== undefined) updateData.nickname = nickname;
+      if (avatar !== undefined) updateData.avatar = avatar;
+      if (phone !== undefined) updateData.phone = phone;
+      if (bio !== undefined) updateData.bio = bio;
       if (role) updateData.role = role;
       if (typeof isActive === 'boolean') updateData.isActive = isActive;
     }
@@ -107,7 +116,11 @@ router.put('/:id', authenticateToken, async (req, res) => {
       select: {
         id: true,
         email: true,
-        fullName: true,
+        displayName: true,
+        nickname: true,
+        avatar: true,
+        phone: true,
+        bio: true,
         role: true,
         isActive: true,
         updatedAt: true
@@ -115,12 +128,12 @@ router.put('/:id', authenticateToken, async (req, res) => {
     });
 
     res.json({
-      message: 'کاربر با موفقیت به‌روزرسانی شد',
+      message: 'پروفایل با موفقیت به‌روزرسانی شد',
       user
     });
   } catch (error) {
     console.error('Update user error:', error);
-    res.status(500).json({ message: 'خطا در به‌روزرسانی کاربر' });
+    res.status(500).json({ message: 'خطا در به‌روزرسانی پروفایل' });
   }
 });
 
