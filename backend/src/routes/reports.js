@@ -48,7 +48,7 @@ router.get('/excel/orders', async (req, res) => {
 
     const orders = await prisma.order.findMany({
       where: whereClause,
-      include: { creator: { select: { fullName: true } } },
+      include: { creator: { select: { displayName: true } } },
       orderBy: { date: 'desc' },
     });
 
@@ -70,10 +70,10 @@ router.get('/excel/orders', async (req, res) => {
       'موجودی بسته‌بندی': order.stockPackaging || 0,
       'قابل فروش': order.saleableCount || 0,
       'ضایعات': order.waste || 0,
-      'وضعیت': order.status === 'pending' ? 'در انتظار' : 
-                order.status === 'processing' ? 'در حال پردازش' : 
-                order.status === 'completed' ? 'تکمیل شده' : 'لغو شده',
-      'ایجاد کننده': order.creator?.fullName || '',
+      'وضعیت': order.status === 'pending' ? 'در انتظار' :
+                  order.status === 'processing' ? 'در حال پردازش' :
+                  order.status === 'completed' ? 'تکمیل شده' : 'لغو شده',
+      'ایجاد کننده': order.creator?.displayName || '',
       'تاریخ ایجاد': new Date(order.createdAt).toLocaleDateString('fa-IR'),
     }));
 
@@ -127,7 +127,7 @@ router.get('/excel/contractors', async (req, res) => {
     const contractors = await prisma.contractor.findMany({
       include: {
         evaluations: {
-          include: { evaluator: { select: { fullName: true } } },
+          include: { evaluator: { select: { displayName: true } } },
         },
       },
     });
