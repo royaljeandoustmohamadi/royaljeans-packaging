@@ -27,6 +27,22 @@
 
 ---
 
+## ✅ خلاصه بهبودهای اعمال شده
+
+بر اساس بازخوردها، این بهبودها اعمال شد:
+
+| مورد | تغییر |
+|------|-------|
+| **OrderItemSize** | حذف `sizeCategoryId` (redundant) - فقط `sizeId` نگه داشته شد |
+| **Workflow** | تغییر از `orderId` به `orderItemId` - هر آیتم مراحل متفاوت دارد |
+| **Inventory** | تفکیک به `ProductInventory` و `MaterialInventory` - بدون nullable |
+| **Material Stock** | حذف `currentStock` - محاسبه از طریق View |
+| **Contractor Rating** | حذف فیلد `rating` - محاسبه از میانگین evaluations |
+| **StageHistory** | تغییر `action` از String به Enum (`StageAction`) |
+| **Payments** | اضافه شدن جدول `Payment` برای رهگیری چک و اقساط |
+
+---
+
 ## 🏗 ساختار جدید دیتابیس
 
 ### ERD کلی
@@ -75,17 +91,41 @@
          │ has
          ▼
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  OrderWorkflow  │     │ WorkflowStages  │     │  StageHistory   │
+│ OrderItemWorkflow│    │ WorkflowStages  │     │  StageHistory   │
 ├─────────────────┤     ├─────────────────┤     ├─────────────────┤
 │ id (PK)         │     │ id (PK)         │     │ id (PK)         │
-│ orderId (FK)    │────►┤ name            │◄────┤ workflowId (FK) │
-│ stageId (FK)    │────►┤ order           │     │ stageId (FK)    │
+│ orderItemId(FK) │────►┤ name            │◄────┤ workflowId (FK) │
+│ stageId (FK)    │────►┤ order           │     │ action (enum)   │
 │ contractorId(FK)│     │ isActive        │     │ contractorId(FK)│
 │ status          │     │ description     │     │ quantity        │
-│ startDate       │     └─────────────────┘     │ startDate       │
-│ endDate         │                             │ endDate         │
-│ notes           │                             │ notes           │
-└─────────────────┘                             └─────────────────┘
+│ startDate       │     └─────────────────┘     │ createdAt       │
+│ endDate         │                             └─────────────────┘
+│ notes           │
+└─────────────────┘
+
+┌─────────────────┐     ┌─────────────────┐
+│     Payment     │     │  ProductInventory│
+├─────────────────┤     ├─────────────────┤
+│ id (PK)         │     │ id (PK)         │
+│ orderId (FK)    │◄────┤ productId (FK)  │
+│ amount          │     │ type (enum)     │
+│ type (enum)     │     │ quantity        │
+│ status (enum)   │     │ warehouseId(FK) │
+│ paidAt          │     │ createdAt       │
+│ dueDate         │     └─────────────────┘
+└─────────────────┘
+
+┌─────────────────┐
+│ MaterialInventory│
+├─────────────────┤
+│ id (PK)         │
+│ materialId (FK) │
+│ type (enum)     │
+│ quantity        │
+│ warehouseId(FK) │
+│ expiryDate      │
+│ createdAt       │
+└─────────────────┘
 
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │  Contractors    │     │ ContractorTypes │     │  Evaluations    │
@@ -96,7 +136,7 @@
 │ phone           │     │ description     │     │ criteriaId (FK) │
 │ address         │     └─────────────────┘     │ score           │
 │ isActive        │                             │ comments        │
-│ createdAt       │                             │ createdAt       │
+│ rating (comp.)  │                             │ createdAt       │
 └─────────────────┘                             └─────────────────┘
 
 ┌─────────────────┐     ┌─────────────────┐
@@ -238,7 +278,7 @@ model Order {
   
   // Relations
   items           OrderItem[]
-  workflows       OrderWorkflow[]
+  payments        Payment[]
   
   createdBy       Int
   creator         User          @relation(fields: [createdBy], references: [id])
@@ -267,6 +307,9 @@ model OrderItem {
   // Size Breakdown
   sizes           OrderItemSize[]
   
+  // Workflow tracking per item
+  workflows       OrderItemWorkflow[]
+  
   // Status
   status          ItemStatus        @default(PENDING)
   
@@ -283,9 +326,7 @@ model OrderItemSize {
   orderItemId     Int
   orderItem       OrderItem     @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
   
-  sizeCategoryId  Int
-  sizeCategory    SizeCategory  @relation(fields: [sizeCategoryId], references: [id])
-  
+  // Size (includes category through Size → SizeCategory relation)
   sizeId          Int
   size            Size          @relation(fields: [sizeId], references: [id])
   
@@ -296,7 +337,6 @@ model OrderItemSize {
   deliveredQty    Int           @default(0)
   
   @@index([orderItemId])
-  @@index([sizeCategoryId])
   @@index([sizeId])
 }
 
@@ -324,6 +364,66 @@ enum Priority {
   NORMAL
   HIGH
   URGENT
+}
+```
+
+---
+
+### 2.1 Payment Tracking (جدید - رهگیری پرداخت‌ها)
+```prisma
+model Payment {
+  id              Int           @id @default(autoincrement())
+  
+  orderId         Int
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  // Payment Details
+  amount          Decimal
+  type            PaymentType   // CASH, CHECK, TRANSFER, CARD
+  
+  // For checks
+  checkNumber     String?
+  checkBank       String?
+  checkDueDate    DateTime?
+  
+  // Status
+  status          PaymentStatus @default(PENDING)
+  
+  // Dates
+  paidAt          DateTime?     // زمان پرداخت واقعی
+  dueDate         DateTime?     // تاریخ سررسید (برای چک)
+  
+  // Reference
+  referenceCode   String?       // شماره پیگیری/رسید
+  
+  // Notes
+  notes           String?
+  
+  // Audit
+  createdBy       Int
+  creator         User          @relation(fields: [createdBy], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@index([orderId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([type])
+}
+
+enum PaymentType {
+  CASH        // نقدی
+  CHECK       // چک
+  TRANSFER    // واریز/انتقال
+  CARD        // کارتخوان
+  CREDIT      // اعتباری
+}
+
+enum PaymentStatus {
+  PENDING     // در انتظار
+  PAID        // پرداخت شده
+  BOUNCED     // برگشت خورده (چک)
+  CANCELLED   // لغو شده
 }
 ```
 
@@ -483,11 +583,12 @@ model Size {
 
 ### 5. Order Workflow (جدید - سیستم گردش کار)
 ```prisma
-model OrderWorkflow {
+model OrderItemWorkflow {
   id              Int             @id @default(autoincrement())
   
-  orderId         Int
-  order           Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  // Workflow per OrderItem (not Order) - each item can have different stages
+  orderItemId     Int
+  orderItem       OrderItem       @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
   
   stageId         Int
   stage           WorkflowStage   @relation(fields: [stageId], references: [id])
@@ -522,7 +623,7 @@ model OrderWorkflow {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   
-  @@index([orderId])
+  @@index([orderItemId])
   @@index([stageId])
   @@index([contractorId])
   @@index([status])
@@ -557,10 +658,10 @@ model StageHistory {
   id              Int             @id @default(autoincrement())
   
   workflowId      Int
-  workflow        OrderWorkflow   @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflow        OrderItemWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
   
-  // What changed
-  action          String          // START, COMPLETE, TRANSFER, WASTE
+  // What changed - using enum for type safety
+  action          StageAction
   
   // Quantities
   quantity        Int?
@@ -578,6 +679,16 @@ model StageHistory {
   
   @@index([workflowId])
   @@index([createdAt])
+}
+
+enum StageAction {
+  STARTED         // شروع مرحله
+  COMPLETED       // تکمیل مرحله
+  TRANSFERRED     // انتقال به مرحله بعد
+  WASTE_RECORDED  // ثبت ضایعات
+  ON_HOLD         // توقف موقت
+  RESUMED         // از سرگیری
+  ASSIGNED        // تخصیص به شخص/پیمانکار
 }
 
 enum WorkflowStatus {
@@ -624,14 +735,14 @@ model Contractor {
   
   // Status
   isActive        Boolean           @default(true)
-  rating          Decimal?          @db.Decimal(2, 1)
+  // Note: rating is computed from evaluations, not stored directly
   
   // Notes
   notes           String?
   
   // Relations
   evaluations     ContractorEvaluation[]
-  orderWorkflows  OrderWorkflow[]
+  orderItemWorkflows OrderItemWorkflow[]
   stageHistories  StageHistory[]
   
   createdAt       DateTime          @default(now())
@@ -704,28 +815,67 @@ model ContractorEvaluation {
 ---
 
 ### 7. Inventory (جدید - سیستم انبارداری)
+
+جدول انبارداری به دو جدول جداگانه تقسیم شده تا nullable fields نداشته باشیم:
+
 ```prisma
-model Inventory {
+// برای محصولات نهایی
+model ProductInventory {
   id              Int               @id @default(autoincrement())
   
   // Reference
-  referenceType   String            // ORDER, PRODUCT, ADJUSTMENT
+  referenceType   String            // ORDER, ADJUSTMENT, RETURN
   referenceId     Int
   
   // Movement Type
   type            InventoryType     // IN, OUT, ADJUSTMENT
   
-  // Item
-  productId       Int?
-  product         Product?          @relation(fields: [productId], references: [id])
-  
-  // For raw materials / accessories
-  itemType        String?           // FABRIC, BUTTON, RIVET...
-  itemId          Int?
+  // Product (always present for ProductInventory)
+  productId       Int
+  product         Product           @relation(fields: [productId], references: [id])
   
   // Quantity
   quantity        Int
-  unit            String            // piece, meter, kg
+  unit            String            // piece
+  
+  // Location
+  warehouseId     Int?
+  warehouse       Warehouse?        @relation(fields: [warehouseId], references: [id])
+  
+  // Details
+  batchNumber     String?
+  
+  notes           String?
+  
+  // Audit
+  createdBy       Int
+  creator         User              @relation(fields: [createdBy], references: [id])
+  createdAt       DateTime          @default(now())
+  
+  @@index([referenceType, referenceId])
+  @@index([productId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// برای مواد اولیه و ملزومات
+model MaterialInventory {
+  id              Int               @id @default(autoincrement())
+  
+  // Reference
+  referenceType   String            // ORDER_WORKFLOW, PURCHASE, ADJUSTMENT, WASTE
+  referenceId     Int
+  
+  // Movement Type
+  type            InventoryType     // IN, OUT, ADJUSTMENT
+  
+  // Material (always present for MaterialInventory)
+  materialId      Int
+  material        Material          @relation(fields: [materialId], references: [id])
+  
+  // Quantity
+  quantity        Int
+  unit            String            // meter, kg, piece
   
   // Location
   warehouseId     Int?
@@ -743,7 +893,7 @@ model Inventory {
   createdAt       DateTime          @default(now())
   
   @@index([referenceType, referenceId])
-  @@index([productId])
+  @@index([materialId])
   @@index([type])
   @@index([createdAt])
 }
@@ -755,7 +905,8 @@ model Warehouse {
   address         String?
   isActive        Boolean       @default(true)
   
-  inventories     Inventory[]
+  productInventories  ProductInventory[]
+  materialInventories MaterialInventory[]
   
   createdAt       DateTime      @default(now())
 }
@@ -784,9 +935,9 @@ model Material {
   // Unit
   unit            String            // meter, kg, piece
   
-  // Stock
-  currentStock    Int               @default(0)
+  // Stock thresholds (not current stock - that's calculated from movements)
   minStock        Int               @default(0)
+  maxStock        Int?              // برای هشدار موجودی بیش از حد
   
   // Pricing
   lastPrice       Decimal?
@@ -796,6 +947,10 @@ model Material {
   // Relations
   suppliers       MaterialSupplier[]
   usages          MaterialUsage[]
+  inventory       MaterialInventory[]
+  
+  // Note: currentStock should be calculated from MaterialInventory movements
+  // Use a view or computed field instead of storing directly
   
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -848,6 +1003,88 @@ model MaterialUsage {
   
   @@index([materialId])
   @@index([referenceType, referenceId])
+}
+```
+
+---
+
+### 8.1 Views برای محاسبات (Computed Fields)
+
+به جای ذخیره مستقیم موجودی، از View یا Stored Procedure استفاده کنید:
+
+```sql
+-- View برای محاسبه موجودی مواد اولیه
+CREATE VIEW material_stock_view AS
+SELECT 
+  m.id AS materialId,
+  m.name,
+  m.code,
+  m.minStock,
+  m.maxStock,
+  COALESCE(SUM(CASE 
+    WHEN mi.type = 'IN' THEN mi.quantity 
+    WHEN mi.type = 'OUT' THEN -mi.quantity 
+    WHEN mi.type = 'ADJUSTMENT' THEN mi.quantity
+    ELSE 0 
+  END), 0) AS currentStock,
+  CASE 
+    WHEN COALESCE(SUM(CASE 
+      WHEN mi.type = 'IN' THEN mi.quantity 
+      WHEN mi.type = 'OUT' THEN -mi.quantity 
+      WHEN mi.type = 'ADJUSTMENT' THEN mi.quantity
+      ELSE 0 
+    END), 0) <= m.minStock THEN 'LOW'
+    WHEN m.maxStock IS NOT NULL AND COALESCE(SUM(CASE 
+      WHEN mi.type = 'IN' THEN mi.quantity 
+      WHEN mi.type = 'OUT' THEN -mi.quantity 
+      WHEN mi.type = 'ADJUSTMENT' THEN mi.quantity
+      ELSE 0 
+    END), 0) >= m.maxStock THEN 'HIGH'
+    ELSE 'OK'
+  END AS stockStatus
+FROM materials m
+LEFT JOIN material_inventories mi ON m.id = mi.materialId
+WHERE m.isActive = true
+GROUP BY m.id, m.name, m.code, m.minStock, m.maxStock;
+
+-- View برای امتیاز پیمانکار (میانگین ارزیابی‌ها)
+CREATE VIEW contractor_rating_view AS
+SELECT 
+  c.id AS contractorId,
+  c.name,
+  COALESCE(AVG(ce.score), 0) AS averageRating,
+  COUNT(ce.id) AS evaluationCount,
+  COALESCE(AVG(CASE WHEN ce.createdAt >= DATE_SUB(NOW(), INTERVAL 3 MONTH) THEN ce.score END), 0) AS recentRating
+FROM contractors c
+LEFT JOIN contractor_evaluations ce ON c.id = ce.contractorId
+WHERE c.isActive = true
+GROUP BY c.id, c.name;
+```
+
+**در Prisma:**
+```prisma
+// برای استفاده از View در Prisma
+// در migrate dev اول view ایجاد کنید، سپس:
+model MaterialStockView {
+  materialId    Int       @id
+  name          String
+  code          String?
+  minStock      Int
+  maxStock      Int?
+  currentStock  Int
+  stockStatus   String    // LOW, OK, HIGH
+  
+  @@map("material_stock_view")
+}
+
+model ContractorRatingView {
+  contractorId      Int       @id
+  name              String
+  averageRating     Float
+  evaluationCount   Int
+  recentRating      Float
+  
+  @@map("contractor_rating_view")
 }
 ```
 
@@ -1011,16 +1248,21 @@ POST   /api/orders/:id/items          // افزودن آیتم
 PUT    /api/orders/:id/items/:itemId  // ویرایش آیتم
 DELETE /api/orders/:id/items/:itemId  // حذف آیتم
 
-// Order Workflow
-GET    /api/orders/:id/workflow       // مراحل گردش کار
-POST   /api/orders/:id/workflow       // شروع مرحله
-PUT    /api/orders/:id/workflow/:wfId // بروزرسانی مرحله
-POST   /api/orders/:id/workflow/:wfId/transfer  // انتقال به مرحله بعد
-POST   /api/orders/:id/workflow/:wfId/waste     // ثبت ضایعات
+// Order Item Workflow (Workflow per item, not per order)
+GET    /api/orders/:id/items/:itemId/workflow       // مراحل گردش کار آیتم
+POST   /api/orders/:id/items/:itemId/workflow       // شروع مرحله
+PUT    /api/orders/:id/items/:itemId/workflow/:wfId // بروزرسانی مرحله
+POST   /api/orders/:id/items/:itemId/workflow/:wfId/transfer  // انتقال به مرحله بعد
+POST   /api/orders/:id/items/:itemId/workflow/:wfId/waste     // ثبت ضایعات
 
 // Order Status Management
 PUT    /api/orders/:id/status         // تغییر وضعیت سفارش
 PUT    /api/orders/:id/priority       // تغییر اولویت
+
+// Payments
+GET    /api/orders/:id/payments       // لیست پرداخت‌ها
+POST   /api/orders/:id/payments       // ثبت پرداخت جدید
+PUT    /api/orders/:id/payments/:paymentId  // ویرایش پرداخت
 ```
 
 #### Products Module
@@ -1061,14 +1303,25 @@ PUT    /api/sizes/:id
 DELETE /api/sizes/:id
 ```
 
-#### Inventory Module
+#### Inventory Module (Split into Product and Material)
 ```javascript
-// Inventory
-GET    /api/inventory                    // موجودی
-GET    /api/inventory/movements          // گردش انبار
-POST   /api/inventory/in                 // ورود به انبار
-POST   /api/inventory/out                // خروج از انبار
-POST   /api/inventory/adjust             // تنظیم موجودی
+// Product Inventory
+GET    /api/inventory/products                    // موجودی محصولات
+GET    /api/inventory/products/movements          // گردش انبار محصولات
+POST   /api/inventory/products/in                 // ورود محصول به انبار
+POST   /api/inventory/products/out                // خروج محصول از انبار
+POST   /api/inventory/products/adjust             // تنظیم موجودی محصول
+
+// Material Inventory
+GET    /api/inventory/materials                   // موجودی مواد اولیه
+GET    /api/inventory/materials/movements         // گردش انبار مواد
+POST   /api/inventory/materials/in                // ورود ماده اولیه
+POST   /api/inventory/materials/out               // خروج ماده اولیه
+POST   /api/inventory/materials/adjust            // تنظیم موجودی ماده
+
+// Stock Views (Computed)
+GET    /api/inventory/materials/stock-levels      // سطح موجودی مواد (from view)
+GET    /api/inventory/materials/low-stock         // هشدار کمبود موجودی
 
 // Warehouses
 GET    /api/inventory/warehouses
@@ -1088,7 +1341,10 @@ DELETE /api/contractors/:id
 // Contractor Evaluations
 GET    /api/contractors/:id/evaluations
 POST   /api/contractors/:id/evaluations
+
+// Contractor Stats (Computed from evaluations)
 GET    /api/contractors/:id/stats        // آمار و ارزیابی‌ها
+GET    /api/contractors/ratings          // لیست امتیازات (from view)
 
 // Contractor Types
 GET    /api/contractors/types
