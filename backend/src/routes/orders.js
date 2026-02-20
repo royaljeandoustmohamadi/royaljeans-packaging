@@ -32,7 +32,7 @@ router.post('/', authenticateToken, async (req, res) => {
         creator: {
           select: {
             id: true,
-            fullName: true,
+            displayName: true,
             email: true
           }
         }
@@ -105,7 +105,7 @@ router.get('/', authenticateToken, async (req, res) => {
           creator: {
             select: {
               id: true,
-              fullName: true,
+              displayName: true,
               email: true
             }
           }
@@ -141,7 +141,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
         creator: {
           select: {
             id: true,
-            fullName: true,
+            displayName: true,
             email: true
           }
         },
@@ -150,7 +150,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
             user: {
               select: {
                 id: true,
-                fullName: true
+                displayName: true
               }
             }
           },
@@ -204,7 +204,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
         creator: {
           select: {
             id: true,
-            fullName: true,
+            displayName: true,
             email: true
           }
         }

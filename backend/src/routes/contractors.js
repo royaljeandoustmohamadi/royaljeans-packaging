@@ -21,7 +21,7 @@ router.get('/', authenticateToken, async (req, res) => {
             evaluator: {
               select: {
                 id: true,
-                fullName: true
+                displayName: true
               }
             }
           },
@@ -100,7 +100,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
             evaluator: {
               select: {
                 id: true,
-                fullName: true,
+                displayName: true,
                 email: true
               }
             }
@@ -240,7 +240,7 @@ router.post('/:id/evaluations', authenticateToken, async (req, res) => {
         evaluator: {
           select: {
             id: true,
-            fullName: true,
+            displayName: true,
             email: true
           }
         },
@@ -281,7 +281,7 @@ router.get('/:id/evaluations', authenticateToken, async (req, res) => {
           evaluator: {
             select: {
               id: true,
-              fullName: true,
+              displayName: true,
               email: true
             }
           }
