@@ -26,6 +26,7 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import { Save, ArrowRight } from 'lucide-react';
 import ordersService from '../../services/orders.service';
+import settingsService from '../../services/settings.service';
 
 const OrderEdit = () => {
   const { id } = useParams();
@@ -33,6 +34,18 @@ const OrderEdit = () => {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  
+  const [settings, setSettings] = useState({
+    productionSuppliers: [],
+    fabricSuppliers: [],
+    fabrics: [],
+    stoneWashes: [],
+    packingNames: [],
+    styles: [],
+    orderTypes: [],
+    orderLevels: [],
+  });
   
   const [formData, setFormData] = useState({
     code: '',
@@ -89,7 +102,19 @@ const OrderEdit = () => {
 
   useEffect(() => {
     fetchOrderData();
+    fetchSettings();
   }, [id]);
+  
+  const fetchSettings = async () => {
+    try {
+      const data = await settingsService.getAll();
+      setSettings(data);
+    } catch (err) {
+      console.error('Failed to fetch settings:', err);
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
 
   const fetchOrderData = async () => {
     try {
@@ -334,7 +359,20 @@ const OrderEdit = () => {
                     </FormControl>
                     <InputField label="کل تعداد" field="totalCount" />
                     <InputField label="تعداد بسته‌بندی" field="packingCount" />
-                    <InputField label="نام بسته‌بندی" field="packingName" />
+                    <FormControl>
+                      <FormLabel fontSize="sm">نام بسته‌بندی</FormLabel>
+                      <Select
+                        value={formData.packingName}
+                        onChange={(e) => handleChange('packingName', e.target.value)}
+                        size="sm"
+                        isDisabled={settingsLoading}
+                      >
+                        <option value="">انتخاب کنید</option>
+                        {settings.packingNames?.map(p => (
+                          <option key={p.id} value={p.name}>{p.name}</option>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </SimpleGrid>
                 </VStack>
               </CardBody>
@@ -346,13 +384,116 @@ const OrderEdit = () => {
             <Card>
               <CardBody>
                 <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-                  <InputField label="نوع پارچه" field="fabric" />
-                  <InputField label="شستشو" field="stoneWash" />
-                  <InputField label="استایل" field="style" />
-                  <InputField label="تأمین‌کننده پارچه" field="fabricSupplier" />
-                  <InputField label="تأمین‌کننده تولید" field="productionSupplier" />
-                  <InputField label="نوع سفارش (BU)" field="bu" />
-                  <InputField label="سطح سفارش (BV)" field="bv" />
+                  <FormControl>
+                    <FormLabel fontSize="sm">نوع پارچه</FormLabel>
+                    <Select
+                      value={formData.fabric}
+                      onChange={(e) => handleChange('fabric', e.target.value)}
+                      size="sm"
+                      isDisabled={settingsLoading}
+                    >
+                      <option value="">انتخاب کنید</option>
+                      {settings.fabrics?.map(f => (
+                        <option key={f.id} value={f.name}>{f.name}</option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  <FormControl>
+                    <FormLabel fontSize="sm">شستشو</FormLabel>
+                    <Select
+                      value={formData.stoneWash}
+                      onChange={(e) => handleChange('stoneWash', e.target.value)}
+                      size="sm"
+                      isDisabled={settingsLoading}
+                    >
+                      <option value="">انتخاب کنید</option>
+                      {settings.stoneWashes?.map(s => (
+                        <option key={s.id} value={s.name}>{s.name}</option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  <FormControl>
+                    <FormLabel fontSize="sm">استایل</FormLabel>
+                    <Select
+                      value={formData.style}
+                      onChange={(e) => handleChange('style', e.target.value)}
+                      size="sm"
+                      isDisabled={settingsLoading}
+                    >
+                      <option value="">انتخاب کنید</option>
+                      {settings.styles?.map(s => (
+                        <option key={s.id} value={s.name}>{s.name}</option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  <FormControl>
+                    <FormLabel fontSize="sm">تأمین‌کننده پارچه</FormLabel>
+                    <Select
+                      value={formData.fabricSupplier}
+                      onChange={(e) => handleChange('fabricSupplier', e.target.value)}
+                      size="sm"
+                      isDisabled={settingsLoading}
+                    >
+                      <option value="">انتخاب کنید</option>
+                      {settings.fabricSuppliers?.map(f => (
+                        <option key={f.id} value={f.name}>{f.name}</option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  <FormControl>
+                    <FormLabel fontSize="sm">تأمین‌کننده تولید</FormLabel>
+                    <Select
+                      value={formData.productionSupplier}
+                      onChange={(e) => handleChange('productionSupplier', e.target.value)}
+                      size="sm"
+                      isDisabled={settingsLoading}
+                    >
+                      <option value="">انتخاب کنید</option>
+                      {settings.productionSuppliers?.map(p => (
+                        <option key={p.id} value={p.name}>{p.name}</option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  <FormControl>
+                    <FormLabel fontSize="sm">نوع سفارش (BU)</FormLabel>
+                    <Select
+                      value={formData.bu}
+                      onChange={(e) => handleChange('bu', e.target.value)}
+                      size="sm"
+                      isDisabled={settingsLoading}
+                    >
+                      <option value="">انتخاب کنید</option>
+                      {settings.orderTypes?.map(t => (
+                        <option key={t.id} value={t.name}>{t.name}</option>
+                      ))}
+                      <option value="رویال جینز">رویال جینز</option>
+                      <option value="بار مشتری">بار مشتری</option>
+                      <option value="نیوکالکشن">نیوکالکشن</option>
+                    </Select>
+                  </FormControl>
+                  
+                  <FormControl>
+                    <FormLabel fontSize="sm">سطح سفارش (BV)</FormLabel>
+                    <Select
+                      value={formData.bv}
+                      onChange={(e) => handleChange('bv', e.target.value)}
+                      size="sm"
+                      isDisabled={settingsLoading}
+                    >
+                      <option value="">انتخاب کنید</option>
+                      {settings.orderLevels?.map(l => (
+                        <option key={l.id} value={l.name}>{l.name}</option>
+                      ))}
+                      <option value="لارج">لارج</option>
+                      <option value="نرمال">نرمال</option>
+                      <option value="ECO">ECO</option>
+                    </Select>
+                  </FormControl>
                 </SimpleGrid>
               </CardBody>
             </Card>
